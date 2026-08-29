@@ -1,14 +1,34 @@
 /**
  * High Standard Apartment — Bookings + Status + Listings
  *
- * Deploy as Web App (Execute as: Me, Who has access: Anyone)
- * Paste Web App URL into booking.html, index.html, status.html as PANEL_URL
+ * IMPORTANT: Deploy → Manage deployments → New version after every code change
+ * Execute as: Me | Who has access: Anyone
  */
 
 var OWNER_EMAIL = 'ima665931@gmail.com';
 var SHEET_NAME = 'Bookings';
 var LISTINGS_SHEET = 'Listings';
 var TOKEN_SECRET = 'HSA_JAIPUR_2026_SECRET_CHANGE_ME';
+
+// Optional: paste Spreadsheet ID from sheet URL (docs.google.com/spreadsheets/d/THIS_ID/edit)
+// Leave empty if script was opened from the Sheet (Extensions → Apps Script)
+var SPREADSHEET_ID = '';
+
+function getSS_() {
+  try {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    if (ss) return ss;
+  } catch (e) {}
+  if (SPREADSHEET_ID) {
+    return SpreadsheetApp.openById(SPREADSHEET_ID);
+  }
+  // last resort: open by name from Drive
+  var files = DriveApp.getFilesByName('High Standard Apartment Panel');
+  if (files.hasNext()) {
+    return SpreadsheetApp.open(files.next());
+  }
+  return null;
+}
 
 function doGet(e) {
   e = e || { parameter: {} };
@@ -17,14 +37,16 @@ function doGet(e) {
   if (p.action === 'confirm' || p.action === 'reject') {
     return handleDecision(p);
   }
-
   if (p.action === 'status') {
     return handleStatus(p);
   }
+  if (p.action === 'ping') {
+    return jsonpOrJson(p, { ok: true, message: 'HSA backend alive', time: new Date().toISOString() });
+  }
 
-  // Listings for homepage
   try {
-    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var ss = getSS_();
+    if (!ss) return jsonpOrJson(p, []);
     var sheet = ss.getSheetByName(LISTINGS_SHEET);
     if (!sheet) return jsonpOrJson(p, []);
     var data = sheet.getDataRange().getValues();
@@ -54,6 +76,9 @@ function doPost(e) {
     }
     return jsonOut({ ok: false, error: 'unknown action' });
   } catch (err) {
+    try {
+      GmailApp.sendEmail(OWNER_EMAIL, 'HSA Script ERROR', String(err));
+    } catch (e2) {}
     return jsonOut({ ok: false, error: String(err) });
   }
 }
@@ -66,15 +91,12 @@ function handleStatus(p) {
   }
   mobile = mobile.slice(-10);
 
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var ss = getSS_();
+  if (!ss) return jsonpOrJson(p, { ok: false, error: 'Spreadsheet not linked' });
   var sheet = ss.getSheetByName(SHEET_NAME);
-  if (!sheet) {
-    return jsonpOrJson(p, { ok: false, error: 'No bookings found' });
-  }
+  if (!sheet) return jsonpOrJson(p, { ok: false, error: 'No bookings sheet' });
 
   var all = sheet.getDataRange().getValues();
-  // Headers: Timestamp, BookingId, Name, Mobile, Email, Address, Visitors, VisitDate, VisitSlot,
-  // PropertyId, PropertyTitle, Area, BHK, Rent, Deposit, Amount, UTR, Notes, Status
   for (var r = 1; r < all.length; r++) {
     var rowId = String(all[r][1] || '').trim().toUpperCase();
     var rowMobile = String(all[r][3] || '').replace(/\D/g, '').slice(-10);
@@ -118,59 +140,12 @@ function formatCell(v) {
 }
 
 function handleNewBooking(data) {
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var sheet = ss.getSheetByName(SHEET_NAME);
-  if (!sheet) {
-    sheet = ss.insertSheet(SHEET_NAME);
-    sheet.appendRow([
-      'Timestamp', 'BookingId', 'Name', 'Mobile', 'Email', 'Address',
-      'Visitors', 'VisitDate', 'VisitSlot', 'PropertyId', 'PropertyTitle',
-      'Area', 'BHK', 'Rent', 'Deposit', 'Amount', 'UTR', 'Notes', 'Status'
-    ]);
-  }
-
   var bookingId = String(data.bookingId || '').trim().toUpperCase();
   if (!bookingId) {
     bookingId = 'HSA-' + Utilities.getUuid().substring(0, 8).toUpperCase();
   }
 
-  var token = Utilities.base64EncodeWebSafe(
-    Utilities.computeHmacSha256Signature(bookingId + '|' + (data.email || ''), TOKEN_SECRET)
-  ).substring(0, 24);
-
-  sheet.appendRow([
-    new Date(),
-    bookingId,
-    data.name || '',
-    data.mobile || '',
-    data.email || '',
-    data.address || '',
-    data.visitors || '',
-    data.visitDate || '',
-    data.visitSlot || '',
-    data.propertyId || '',
-    data.propertyTitle || '',
-    data.area || '',
-    data.bhk || '',
-    data.rent || '',
-    data.deposit || '',
-    data.amount || 199,
-    data.utr || '',
-    data.notes || '',
-    'Pending'
-  ]);
-
-  var tokSheet = ss.getSheetByName('_tokens');
-  if (!tokSheet) {
-    tokSheet = ss.insertSheet('_tokens');
-    tokSheet.appendRow(['bookingId', 'token', 'email', 'name', 'status']);
-  }
-  tokSheet.appendRow([bookingId, token, data.email || '', data.name || '', 'Pending']);
-
-  var webUrl = ScriptApp.getService().getUrl();
-  var confirmUrl = webUrl + '?action=confirm&id=' + encodeURIComponent(bookingId) + '&t=' + encodeURIComponent(token);
-  var rejectUrl = webUrl + '?action=reject&id=' + encodeURIComponent(bookingId) + '&t=' + encodeURIComponent(token);
-
+  // 1) EMAIL FIRST — even if sheet fails, you still get the lead
   var ownerHtml =
     '<div style="font-family:Arial,sans-serif;max-width:560px;line-height:1.5">' +
     '<h2 style="color:#1C2430">New Visit Booking</h2>' +
@@ -191,14 +166,26 @@ function handleNewBooking(data) {
     row('Fee', 'Rs. ' + (data.amount || 199)) +
     row('UTR', '<b style="color:#B85C33">' + (data.utr || '') + '</b>') +
     row('Notes', data.notes) +
-    '</table>' +
-    '<p style="margin-top:24px">Verify UTR in your UPI app, then choose:</p>' +
-    '<p>' +
-    '<a href="' + confirmUrl + '" style="display:inline-block;background:#3E7A52;color:#fff;padding:12px 20px;text-decoration:none;border-radius:4px;margin-right:12px">Visit Confirmed</a>' +
-    '<a href="' + rejectUrl + '" style="display:inline-block;background:#A23B3B;color:#fff;padding:12px 20px;text-decoration:none;border-radius:4px">Visit Not Confirmed</a>' +
-    '</p>' +
-    '<p style="color:#666;font-size:12px">Clicking a button emails the customer automatically.</p>' +
-    '</div>';
+    '</table>';
+
+  var token = '';
+  try {
+    token = Utilities.base64EncodeWebSafe(
+      Utilities.computeHmacSha256Signature(bookingId + '|' + (data.email || ''), TOKEN_SECRET)
+    ).substring(0, 24);
+    var webUrl = ScriptApp.getService().getUrl();
+    var confirmUrl = webUrl + '?action=confirm&id=' + encodeURIComponent(bookingId) + '&t=' + encodeURIComponent(token);
+    var rejectUrl = webUrl + '?action=reject&id=' + encodeURIComponent(bookingId) + '&t=' + encodeURIComponent(token);
+    ownerHtml +=
+      '<p style="margin-top:24px">Verify UTR, then choose:</p>' +
+      '<p>' +
+      '<a href="' + confirmUrl + '" style="display:inline-block;background:#3E7A52;color:#fff;padding:12px 20px;text-decoration:none;border-radius:4px;margin-right:12px">Visit Confirmed</a>' +
+      '<a href="' + rejectUrl + '" style="display:inline-block;background:#A23B3B;color:#fff;padding:12px 20px;text-decoration:none;border-radius:4px">Visit Not Confirmed</a>' +
+      '</p>';
+  } catch (eTok) {
+    ownerHtml += '<p style="color:#A23B3B">Token/buttons error: ' + eTok + '</p>';
+  }
+  ownerHtml += '</div>';
 
   GmailApp.sendEmail(OWNER_EMAIL, 'New Visit Booking — ' + (data.name || bookingId), '', {
     htmlBody: ownerHtml,
@@ -206,17 +193,68 @@ function handleNewBooking(data) {
   });
 
   if (data.email) {
-    GmailApp.sendEmail(data.email, 'We received your visit request — High Standard Apartment', '', {
-      htmlBody:
-        '<div style="font-family:Arial,sans-serif;max-width:520px">' +
-        '<h2>Request received</h2>' +
-        '<p>Hi ' + (data.name || '') + ',</p>' +
-        '<p>We got your visit booking for <b>' + (data.propertyTitle || 'the flat') + '</b>.</p>' +
-        '<p><b>Booking ID: ' + bookingId + '</b><br>UTR: ' + (data.utr || '') + '</p>' +
-        '<p>Track status anytime on our website (Status page) using this Booking ID and your mobile number. You will also get an email when we confirm.</p>' +
-        '<p>— High Standard Apartment, Jaipur</p></div>',
-      name: 'High Standard Apartment'
-    });
+    try {
+      GmailApp.sendEmail(data.email, 'We received your visit request — High Standard Apartment', '', {
+        htmlBody:
+          '<div style="font-family:Arial,sans-serif;max-width:520px">' +
+          '<h2>Request received</h2>' +
+          '<p>Hi ' + (data.name || '') + ',</p>' +
+          '<p>We got your visit booking for <b>' + (data.propertyTitle || 'the flat') + '</b>.</p>' +
+          '<p><b>Booking ID: ' + bookingId + '</b><br>UTR: ' + (data.utr || '') + '</p>' +
+          '<p>Track status on our website Status page using Booking ID + mobile. Email will also come when confirmed.</p>' +
+          '<p>— High Standard Apartment, Jaipur</p></div>',
+        name: 'High Standard Apartment'
+      });
+    } catch (eUser) {}
+  }
+
+  // 2) Save to sheet (after email)
+  try {
+    var ss = getSS_();
+    if (!ss) throw new Error('Spreadsheet not found — open script from the Sheet or set SPREADSHEET_ID');
+    var sheet = ss.getSheetByName(SHEET_NAME);
+    if (!sheet) {
+      sheet = ss.insertSheet(SHEET_NAME);
+      sheet.appendRow([
+        'Timestamp', 'BookingId', 'Name', 'Mobile', 'Email', 'Address',
+        'Visitors', 'VisitDate', 'VisitSlot', 'PropertyId', 'PropertyTitle',
+        'Area', 'BHK', 'Rent', 'Deposit', 'Amount', 'UTR', 'Notes', 'Status'
+      ]);
+    }
+    sheet.appendRow([
+      new Date(),
+      bookingId,
+      data.name || '',
+      data.mobile || '',
+      data.email || '',
+      data.address || '',
+      data.visitors || '',
+      data.visitDate || '',
+      data.visitSlot || '',
+      data.propertyId || '',
+      data.propertyTitle || '',
+      data.area || '',
+      data.bhk || '',
+      data.rent || '',
+      data.deposit || '',
+      data.amount || 199,
+      data.utr || '',
+      data.notes || '',
+      'Pending'
+    ]);
+
+    if (token) {
+      var tokSheet = ss.getSheetByName('_tokens');
+      if (!tokSheet) {
+        tokSheet = ss.insertSheet('_tokens');
+        tokSheet.appendRow(['bookingId', 'token', 'email', 'name', 'status']);
+      }
+      tokSheet.appendRow([bookingId, token, data.email || '', data.name || '', 'Pending']);
+    }
+  } catch (eSheet) {
+    try {
+      GmailApp.sendEmail(OWNER_EMAIL, 'HSA Sheet save failed — ' + bookingId, String(eSheet));
+    } catch (e2) {}
   }
 
   return jsonOut({ ok: true, bookingId: bookingId });
@@ -227,7 +265,8 @@ function handleDecision(p) {
   var token = p.t || '';
   var action = p.action;
 
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var ss = getSS_();
+  if (!ss) return htmlPage('Error', 'Spreadsheet not linked.');
   var tokSheet = ss.getSheetByName('_tokens');
   if (!tokSheet) return htmlPage('Error', 'Invalid or expired link.');
 
@@ -273,7 +312,6 @@ function handleDecision(p) {
           '<p>Hi ' + (name || '') + ',</p>' +
           '<p><b>Your visit is confirmed.</b> Our Agent will reach you soon.</p>' +
           '<p>Booking ID: ' + bookingId + '</p>' +
-          '<p>You can also check status on our website Status page.</p>' +
           '<p>— High Standard Apartment, Jaipur</p></div>',
         name: 'High Standard Apartment'
       });
@@ -283,7 +321,7 @@ function handleDecision(p) {
           '<div style="font-family:Arial,sans-serif;max-width:520px">' +
           '<h2 style="color:#A23B3B">Visit Not Confirmed</h2>' +
           '<p>Hi ' + (name || '') + ',</p>' +
-          '<p><b>Your visiting fee was due</b> / payment could not be verified. Please contact us if you already paid.</p>' +
+          '<p><b>Your visiting fee was due</b> / payment could not be verified.</p>' +
           '<p>Booking ID: ' + bookingId + '</p>' +
           '<p>— High Standard Apartment, Jaipur</p></div>',
         name: 'High Standard Apartment'
@@ -292,16 +330,11 @@ function handleDecision(p) {
   }
 
   GmailApp.sendEmail(OWNER_EMAIL, 'Booking ' + newStatus + ' — ' + bookingId, '', {
-    htmlBody: '<p>Booking <b>' + bookingId + '</b> marked as <b>' + newStatus + '</b>. Customer emailed.</p>',
+    htmlBody: '<p>Booking <b>' + bookingId + '</b> marked as <b>' + newStatus + '</b>.</p>',
     name: 'High Standard Apartment'
   });
 
-  return htmlPage(
-    newStatus,
-    action === 'confirm'
-      ? 'Visit Confirmed. Customer has been emailed.'
-      : 'Visit Not Confirmed. Customer has been emailed.'
-  );
+  return htmlPage(newStatus, 'Done. Customer has been emailed.');
 }
 
 function row(label, value) {
