@@ -96,27 +96,48 @@ module.exports = async (req, res) => {
       '<p style="margin-top:16px;color:#888;font-size:12px">Customer will NOT receive any email — they will see the status on the website\'s Status page.</p>' +
       '</div>';
 
-    try {
-      const transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-          user: process.env.GMAIL_USER,
-          pass: process.env.GMAIL_APP_PASSWORD
-        }
-      });
+    let emailSent = false;
+    let emailError = null;
 
-      await transporter.sendMail({
-        from: `"High Standard Apartment" <${process.env.GMAIL_USER}>`,
-        to: process.env.OWNER_EMAIL,
-        subject: `New Visit Booking — ${record.name || bookingId}`,
-        html: ownerHtml
-      });
-    } catch (mailErr) {
-      // Booking is already saved to KV even if the email fails — log it, don't fail the request
-      console.error('Owner email failed:', mailErr);
+    const gmailUser = process.env.GMAIL_USER;
+    const gmailPass = process.env.GMAIL_APP_PASSWORD;
+    const ownerEmail = process.env.OWNER_EMAIL || gmailUser;
+
+    if (!gmailUser || !gmailPass || !ownerEmail) {
+      emailError = 'Missing env vars: GMAIL_USER / GMAIL_APP_PASSWORD / OWNER_EMAIL — set them in Vercel → Settings → Environment Variables';
+      console.error(emailError);
+    } else {
+      try {
+        const transporter = nodemailer.createTransport({
+          host: 'smtp.gmail.com',
+          port: 465,
+          secure: true,
+          auth: {
+            user: gmailUser,
+            pass: gmailPass
+          }
+        });
+
+        await transporter.sendMail({
+          from: `"High Standard Apartment" <${gmailUser}>`,
+          to: ownerEmail,
+          subject: `New Visit Booking — ${record.name || bookingId}`,
+          html: ownerHtml
+        });
+        emailSent = true;
+      } catch (mailErr) {
+        // Booking is already saved to KV even if the email fails
+        emailError = String((mailErr && mailErr.message) || mailErr);
+        console.error('Owner email failed:', mailErr);
+      }
     }
 
-    return res.status(200).json({ ok: true, bookingId });
+    return res.status(200).json({
+      ok: true,
+      bookingId,
+      emailSent,
+      emailError: emailError || undefined
+    });
   } catch (err) {
     console.error('Booking error:', err);
     return res.status(500).json({ ok: false, error: String((err && err.message) || err) });
