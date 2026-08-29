@@ -106,24 +106,29 @@
   .listing-area{ font-family:'IBM Plex Mono', monospace; font-size:0.72rem; color:var(--sandstone-deep); text-transform:uppercase; letter-spacing:.05em; }
   .listing-meta{ display:flex; gap:16px; color:var(--ink-soft); font-size:0.84rem; margin:4px 0 6px; }
   .listing-price{
-    display:flex; flex-direction:column; align-items:flex-start; gap:4px;
+    display:flex; flex-direction:column; align-items:flex-start; gap:6px;
     margin-top:auto; padding-top:14px; border-top:1px solid var(--line);
     overflow:visible; width:100%;
   }
+  .listing-price .price-row{
+    display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 6px;
+    max-width:100%;
+  }
+  .listing-price .currency{
+    font-family:'Work Sans', system-ui, -apple-system, sans-serif;
+    font-weight:700; font-size:1.35rem; color:var(--ink);
+    flex-shrink:0;
+  }
   .listing-price .amt{
-    font-family:'Work Sans', system-ui, sans-serif;
+    font-family:'Work Sans', system-ui, -apple-system, sans-serif;
     font-weight:700; font-size:1.35rem; line-height:1.3;
-    color:var(--ink); letter-spacing:0; white-space:normal;
-    padding:0; margin:0; max-width:100%;
+    color:var(--ink); letter-spacing:0; white-space:nowrap;
   }
-  .listing-price .amt .per{
+  .listing-price .per{
     font-family:'IBM Plex Mono', monospace; font-size:0.72rem; font-weight:400;
-    color:var(--ink-soft); margin-left:6px;
+    color:var(--ink-soft);
   }
-  .listing-price > .per{
-    font-family:'IBM Plex Mono', monospace; font-size:0.7rem;
-    color:var(--ink-soft); white-space:normal;
-  }
+  .listing-price .price-row.sub .per{ font-size:0.7rem; }
   .listing-body{ overflow:visible; min-width:0; padding:20px 18px; }
   .listing-card{ overflow:visible; min-width:0; }
   @media(max-width:640px){
@@ -209,7 +214,7 @@
         <div><span class="num">16+</span><span class="lbl">Verified Listings</span></div>
         <div><span class="num">12</span><span class="lbl">Areas Covered</span></div>
         <div><span class="num">100%</span><span class="lbl">Verified Owners</span></div>
-        <div><span class="num">₹199</span><span class="lbl">Visit Booking Fee</span></div>
+        <div><span class="num">Rs. 199</span><span class="lbl">Visit Booking Fee</span></div>
       </div>
     </div>
     <div class="hero-photo">
@@ -460,8 +465,8 @@
             <span>${l.size}</span><span>·</span><span>${l.furnish}</span>
           </div>
           <div class="listing-price">
-            <span class="amt">₹${Number(l.rent).toLocaleString('en-IN')}<span class="per">/month</span></span>
-            <span class="per">Deposit ₹${Number(l.deposit).toLocaleString('en-IN')}</span>
+            <div class="price-row"><span class="currency">Rs.</span><span class="amt">${Number(l.rent).toLocaleString('en-IN')}</span><span class="per">/month</span></div>
+            <div class="price-row sub"><span class="per">Deposit Rs. ${Number(l.deposit).toLocaleString('en-IN')}</span></div>
           </div>
           <a class="listing-book" href="booking.html?id=${encodeURIComponent(l.id)}&title=${encodeURIComponent(l.title)}&area=${encodeURIComponent(l.area)}&bhk=${encodeURIComponent(l.bhk)}&rent=${l.rent}&deposit=${l.deposit}">Book a Visit</a>
         </div>
