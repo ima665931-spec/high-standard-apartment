@@ -1,4 +1,4 @@
-const { kv } = require('@vercel/kv');
+const { redis } = require('./_lib/redis');
 
 module.exports = async (req, res) => {
   const src = req.method === 'GET' ? req.query : (req.body || {});
@@ -10,7 +10,7 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const record = await kv.get(`booking:${bookingId}`);
+    const record = await redis.get(`booking:${bookingId}`);
 
     if (!record || record.mobile !== mobile) {
       return res.status(200).json({ ok: false, error: 'No booking found for this ID and mobile' });
