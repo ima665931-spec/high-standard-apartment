@@ -1,10 +1,17 @@
-const { redis } = require('./_lib/redis');
+const { redis, redisConfigured } = require('./_lib/redis');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') {
     return res.status(405).json({ ok: false, error: 'Method not allowed' });
+  }
+
+  if (!redisConfigured || !redis) {
+    return res.status(500).json({
+      ok: false,
+      error: 'Database not configured — KV_REST_API_URL/TOKEN env vars are missing. Connect Upstash in Vercel → Storage, then redeploy.'
+    });
   }
 
   try {
