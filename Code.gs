@@ -1,59 +1,44 @@
 /**
- * High Standard Apartment — Booking + Listings Apps Script
+ * High Standard Apartment — Bookings + Status + Listings
  *
- * SETUP (do this once under ima665931@gmail.com):
- * 1. Go to https://script.google.com → New project
- * 2. Paste this entire file into Code.gs
- * 3. Create a Google Sheet named "HSA Bookings" (or change SHEET_NAME below)
- *    - Sheet1 tab for bookings (auto-created headers)
- *    - Optional "Listings" tab for flats (see columns below)
- * 4. Deploy → New deployment → Type: Web app
- *    - Execute as: Me
- *    - Who has access: Anyone
- * 5. Copy the Web App URL and paste it into booking.html + index.html as PANEL_URL
- *
- * LISTINGS TAB columns (row 1 headers):
- * id | area | bhk | title | size | furnish | rent | deposit | img
- *
- * Owner email gets Confirm / Not Confirm buttons.
- * Clicking them emails the user automatically.
+ * Deploy as Web App (Execute as: Me, Who has access: Anyone)
+ * Paste Web App URL into booking.html, index.html, status.html as PANEL_URL
  */
 
 var OWNER_EMAIL = 'ima665931@gmail.com';
 var SHEET_NAME = 'Bookings';
 var LISTINGS_SHEET = 'Listings';
-var TOKEN_SECRET = 'HSA_JAIPUR_2026_SECRET_CHANGE_ME'; // change this to any random string
+var TOKEN_SECRET = 'HSA_JAIPUR_2026_SECRET_CHANGE_ME';
 
 function doGet(e) {
   e = e || { parameter: {} };
   var p = e.parameter || {};
 
-  // Confirm / Reject action from email buttons
   if (p.action === 'confirm' || p.action === 'reject') {
     return handleDecision(p);
   }
 
-  // Listings API for homepage
+  if (p.action === 'status') {
+    return handleStatus(p);
+  }
+
+  // Listings for homepage
   try {
     var ss = SpreadsheetApp.getActiveSpreadsheet();
     var sheet = ss.getSheetByName(LISTINGS_SHEET);
-    if (!sheet) {
-      return jsonOut([]);
-    }
+    if (!sheet) return jsonpOrJson(p, []);
     var data = sheet.getDataRange().getValues();
-    if (data.length < 2) return jsonOut([]);
+    if (data.length < 2) return jsonpOrJson(p, []);
     var headers = data[0].map(function(h){ return String(h).toLowerCase().trim(); });
     var rows = [];
     for (var i = 1; i < data.length; i++) {
       var obj = {};
-      for (var j = 0; j < headers.length; j++) {
-        obj[headers[j]] = data[i][j];
-      }
+      for (var j = 0; j < headers.length; j++) obj[headers[j]] = data[i][j];
       if (obj.id) rows.push(obj);
     }
-    return jsonOut(rows);
+    return jsonpOrJson(p, rows);
   } catch (err) {
-    return jsonOut([]);
+    return jsonpOrJson(p, []);
   }
 }
 
@@ -61,14 +46,75 @@ function doPost(e) {
   try {
     var body = e.postData && e.postData.contents ? e.postData.contents : '{}';
     var data = JSON.parse(body);
-
     if (data.action === 'new_booking' || data.utr) {
       return handleNewBooking(data);
+    }
+    if (data.action === 'status') {
+      return handleStatus(data);
     }
     return jsonOut({ ok: false, error: 'unknown action' });
   } catch (err) {
     return jsonOut({ ok: false, error: String(err) });
   }
+}
+
+function handleStatus(p) {
+  var bookingId = String(p.id || p.bookingId || '').trim().toUpperCase();
+  var mobile = String(p.mobile || '').trim().replace(/\D/g, '');
+  if (!bookingId || mobile.length < 10) {
+    return jsonpOrJson(p, { ok: false, error: 'Booking ID and 10-digit mobile required' });
+  }
+  mobile = mobile.slice(-10);
+
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName(SHEET_NAME);
+  if (!sheet) {
+    return jsonpOrJson(p, { ok: false, error: 'No bookings found' });
+  }
+
+  var all = sheet.getDataRange().getValues();
+  // Headers: Timestamp, BookingId, Name, Mobile, Email, Address, Visitors, VisitDate, VisitSlot,
+  // PropertyId, PropertyTitle, Area, BHK, Rent, Deposit, Amount, UTR, Notes, Status
+  for (var r = 1; r < all.length; r++) {
+    var rowId = String(all[r][1] || '').trim().toUpperCase();
+    var rowMobile = String(all[r][3] || '').replace(/\D/g, '').slice(-10);
+    if (rowId === bookingId && rowMobile === mobile) {
+      return jsonpOrJson(p, {
+        ok: true,
+        bookingId: rowId,
+        name: all[r][2],
+        mobile: rowMobile,
+        email: all[r][4],
+        visitDate: formatCell(all[r][7]),
+        visitSlot: all[r][8],
+        propertyTitle: all[r][10],
+        area: all[r][11],
+        bhk: all[r][12],
+        utr: all[r][16],
+        status: all[r][18] || 'Pending',
+        message: statusMessage(all[r][18] || 'Pending')
+      });
+    }
+  }
+  return jsonpOrJson(p, { ok: false, error: 'No booking found for this ID and mobile' });
+}
+
+function statusMessage(status) {
+  var s = String(status || 'Pending').toLowerCase();
+  if (s.indexOf('confirm') >= 0 && s.indexOf('not') < 0) {
+    return 'Your visit is confirmed. Our Agent will reach you soon.';
+  }
+  if (s.indexOf('not') >= 0 || s.indexOf('reject') >= 0 || s.indexOf('fail') >= 0) {
+    return 'Your visiting fee was due / payment could not be verified. Please contact us if you already paid.';
+  }
+  return 'Payment verification is in progress. Usually confirmed within a few hours.';
+}
+
+function formatCell(v) {
+  if (Object.prototype.toString.call(v) === '[object Date]') {
+    return Utilities.formatDate(v, Session.getScriptTimeZone() || 'Asia/Kolkata', 'yyyy-MM-dd');
+  }
+  return v == null ? '' : String(v);
 }
 
 function handleNewBooking(data) {
@@ -83,7 +129,11 @@ function handleNewBooking(data) {
     ]);
   }
 
-  var bookingId = 'HSA-' + Utilities.getUuid().substring(0, 8).toUpperCase();
+  var bookingId = String(data.bookingId || '').trim().toUpperCase();
+  if (!bookingId) {
+    bookingId = 'HSA-' + Utilities.getUuid().substring(0, 8).toUpperCase();
+  }
+
   var token = Utilities.base64EncodeWebSafe(
     Utilities.computeHmacSha256Signature(bookingId + '|' + (data.email || ''), TOKEN_SECRET)
   ).substring(0, 24);
@@ -110,7 +160,6 @@ function handleNewBooking(data) {
     'Pending'
   ]);
 
-  // Store token mapping in a small side sheet
   var tokSheet = ss.getSheetByName('_tokens');
   if (!tokSheet) {
     tokSheet = ss.insertSheet('_tokens');
@@ -139,7 +188,7 @@ function handleNewBooking(data) {
     row('BHK', data.bhk) +
     row('Rent', data.rent) +
     row('Deposit', data.deposit) +
-    row('Fee', '₹' + (data.amount || 199)) +
+    row('Fee', 'Rs. ' + (data.amount || 199)) +
     row('UTR', '<b style="color:#B85C33">' + (data.utr || '') + '</b>') +
     row('Notes', data.notes) +
     '</table>' +
@@ -156,7 +205,6 @@ function handleNewBooking(data) {
     name: 'High Standard Apartment'
   });
 
-  // Optional: acknowledge to user
   if (data.email) {
     GmailApp.sendEmail(data.email, 'We received your visit request — High Standard Apartment', '', {
       htmlBody:
@@ -164,8 +212,8 @@ function handleNewBooking(data) {
         '<h2>Request received</h2>' +
         '<p>Hi ' + (data.name || '') + ',</p>' +
         '<p>We got your visit booking for <b>' + (data.propertyTitle || 'the flat') + '</b>.</p>' +
-        '<p>Booking ID: <b>' + bookingId + '</b><br>UTR: ' + (data.utr || '') + '</p>' +
-        '<p>Our team will verify payment and email you the final status shortly.</p>' +
+        '<p><b>Booking ID: ' + bookingId + '</b><br>UTR: ' + (data.utr || '') + '</p>' +
+        '<p>Track status anytime on our website (Status page) using this Booking ID and your mobile number. You will also get an email when we confirm.</p>' +
         '<p>— High Standard Apartment, Jaipur</p></div>',
       name: 'High Standard Apartment'
     });
@@ -181,9 +229,7 @@ function handleDecision(p) {
 
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var tokSheet = ss.getSheetByName('_tokens');
-  if (!tokSheet) {
-    return htmlPage('Error', 'Invalid or expired link.');
-  }
+  if (!tokSheet) return htmlPage('Error', 'Invalid or expired link.');
 
   var data = tokSheet.getDataRange().getValues();
   var rowIndex = -1;
@@ -197,9 +243,7 @@ function handleDecision(p) {
       break;
     }
   }
-  if (rowIndex < 0) {
-    return htmlPage('Error', 'Invalid or expired link.');
-  }
+  if (rowIndex < 0) return htmlPage('Error', 'Invalid or expired link.');
 
   var currentStatus = data[rowIndex - 1][4];
   if (currentStatus && currentStatus !== 'Pending') {
@@ -209,13 +253,12 @@ function handleDecision(p) {
   var newStatus = action === 'confirm' ? 'Confirmed' : 'Not Confirmed';
   tokSheet.getRange(rowIndex, 5).setValue(newStatus);
 
-  // Update main Bookings sheet Status column
   var sheet = ss.getSheetByName(SHEET_NAME);
   if (sheet) {
     var all = sheet.getDataRange().getValues();
     for (var r = 1; r < all.length; r++) {
       if (String(all[r][1]) === bookingId) {
-        sheet.getRange(r + 1, 19).setValue(newStatus); // Status col
+        sheet.getRange(r + 1, 19).setValue(newStatus);
         break;
       }
     }
@@ -230,6 +273,7 @@ function handleDecision(p) {
           '<p>Hi ' + (name || '') + ',</p>' +
           '<p><b>Your visit is confirmed.</b> Our Agent will reach you soon.</p>' +
           '<p>Booking ID: ' + bookingId + '</p>' +
+          '<p>You can also check status on our website Status page.</p>' +
           '<p>— High Standard Apartment, Jaipur</p></div>',
         name: 'High Standard Apartment'
       });
@@ -247,7 +291,6 @@ function handleDecision(p) {
     }
   }
 
-  // Notify owner
   GmailApp.sendEmail(OWNER_EMAIL, 'Booking ' + newStatus + ' — ' + bookingId, '', {
     htmlBody: '<p>Booking <b>' + bookingId + '</b> marked as <b>' + newStatus + '</b>. Customer emailed.</p>',
     name: 'High Standard Apartment'
@@ -256,8 +299,8 @@ function handleDecision(p) {
   return htmlPage(
     newStatus,
     action === 'confirm'
-      ? 'Visit Confirmed. Customer has been emailed: “Your visit is confirmed. Our Agent will reach you soon.”'
-      : 'Visit Not Confirmed. Customer has been emailed: “Your visiting fee was due.”'
+      ? 'Visit Confirmed. Customer has been emailed.'
+      : 'Visit Not Confirmed. Customer has been emailed.'
   );
 }
 
@@ -269,6 +312,15 @@ function row(label, value) {
 function jsonOut(obj) {
   return ContentService.createTextOutput(JSON.stringify(obj))
     .setMimeType(ContentService.MimeType.JSON);
+}
+
+function jsonpOrJson(p, obj) {
+  var cb = p && p.callback ? String(p.callback).replace(/[^a-zA-Z0-9_$]/g, '') : '';
+  if (cb) {
+    return ContentService.createTextOutput(cb + '(' + JSON.stringify(obj) + ')')
+      .setMimeType(ContentService.MimeType.JAVASCRIPT);
+  }
+  return jsonOut(obj);
 }
 
 function htmlPage(title, msg) {

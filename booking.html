@@ -145,7 +145,7 @@
       <div class="brand">High Standard<span class="dot">•</span>Apartment</div>
       <span class="brand-by">by Premium Market</span>
     </div>
-    <a href="index.html" class="back-link">&larr; Back to listings</a>
+    <div style="display:flex;gap:16px;align-items:center"><a href="status.html" class="back-link">Status</a><a href="index.html" class="back-link">&larr; Listings</a></div>
   </nav>
 </header>
 
@@ -293,10 +293,14 @@
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#F5EFE3" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg>
     </div>
     <h2>Request Submitted!</h2>
-    <p id="successMsg">Our team will verify your payment and email you the visit status shortly.</p>
-    <div class="ref" id="successRef">UTR: —</div>
-    <p class="tagline">Thanks for being with High Standard Apartment, Jaipur — by Premium Market</p>
-    <a href="index.html" class="submit-btn" style="display:inline-block; text-decoration:none; max-width:220px;">Back to Listings</a>
+    <p id="successMsg">Save your Booking ID. We will verify the UTR shortly.</p>
+    <div class="ref" id="successRef">Booking ID: —</div>
+    <div class="ref" id="successUtr" style="margin-top:8px;">UTR: —</div>
+    <p class="tagline" style="margin-top:8px;margin-bottom:12px;">Check status anytime on the <a href="status.html" style="color:var(--sandstone-deep);text-decoration:underline;">Status / Notice page</a> using this Booking ID + your mobile. You will also get an email when confirmed.</p>
+    <div style="display:flex;flex-direction:column;gap:10px;align-items:center;">
+      <a href="status.html" class="submit-btn" style="display:inline-block; text-decoration:none; max-width:260px;text-align:center;">Check Status</a>
+      <a href="index.html" class="secondary-btn" style="display:inline-block; text-decoration:none; max-width:260px;text-align:center;padding:12px;">Back to Listings</a>
+    </div>
   </div>
 </div>
 
@@ -442,8 +446,10 @@
     payBtn.disabled = true;
     payBtn.textContent = 'Submitting…';
 
+    const bookingId = 'HSA-' + Math.random().toString(36).substring(2, 6).toUpperCase() + Date.now().toString(36).toUpperCase().slice(-4);
     const bookingDetails = {
       action: 'new_booking',
+      bookingId: bookingId,
       propertyId: propId,
       propertyTitle: propTitle,
       area: propArea,
@@ -471,13 +477,44 @@
       }).catch(function(err){ console.error('Could not send booking:', err); });
     }
 
-    document.getElementById('successMsg').textContent = 'Our team will verify your payment and email you the visit status shortly.';
-    document.getElementById('successRef').textContent = 'UTR: ' + bookingDetails.utr;
+    try {
+      localStorage.setItem('hsa_last_booking', JSON.stringify({
+        bookingId: bookingId,
+        mobile: bookingDetails.mobile,
+        email: bookingDetails.email,
+        name: bookingDetails.name,
+        propertyTitle: propTitle,
+        area: propArea,
+        visitDate: bookingDetails.visitDate,
+        visitSlot: selectedSlot,
+        utr: bookingDetails.utr,
+        status: 'Pending',
+        savedAt: Date.now()
+      }));
+    } catch (e) {}
+
+    document.getElementById('successMsg').textContent = 'Save your Booking ID. Check status on the Notice page — email will also arrive after verification.';
+    document.getElementById('successRef').textContent = 'Booking ID: ' + bookingId;
+    document.getElementById('successUtr').textContent = 'UTR: ' + bookingDetails.utr;
     document.getElementById('successOverlay').classList.add('show');
 
     payBtn.disabled = false;
     payBtn.textContent = 'Submit & Confirm Visit';
   });
+</script>
+
+
+<script>
+(function(){
+  try {
+    var s = JSON.parse(localStorage.getItem('hsa_last_booking') || 'null');
+    if (!s || !s.bookingId) return;
+    var bar = document.createElement('div');
+    bar.style.cssText = 'background:#1C2430;color:#F5EFE3;padding:12px 16px;font-size:0.85rem;text-align:center;';
+    bar.innerHTML = 'You have a visit booking <b style="color:#AD8A52">' + s.bookingId + '</b> (' + (s.status||'Pending') + ') — <a href="status.html" style="color:#F5EFE3;text-decoration:underline">Check status</a>';
+    document.body.insertBefore(bar, document.body.firstChild);
+  } catch(e) {}
+})();
 </script>
 
 </body>
