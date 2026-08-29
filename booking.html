@@ -8,9 +8,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
---ivory:#F5EFE3; --ivory-dim:#EDE4D2; --ink:#1C2430; --ink-soft:#3A4250;
---sandstone:#B85C33; --sandstone-deep:#8C4525; --line: rgba(28,36,48,0.14); --radius:2px;
---error:#A23B3B; --ok:#3E7A52;
+  --ivory:#F5EFE3; --ivory-dim:#EDE4D2; --ink:#1C2430; --ink-soft:#3A4250;
+  --sandstone:#B85C33; --sandstone-deep:#8C4525; --line: rgba(28,36,48,0.14); --radius:2px;
+  --error:#A23B3B; --ok:#3E7A52;
 }
 *{box-sizing:border-box; margin:0; padding:0;}
 body{ background:var(--ivory); color:var(--ink); font-family:'Work Sans', sans-serif; line-height:1.6; }
@@ -32,12 +32,12 @@ main{ padding:56px 0 100px; }
 .num-tag{ font-family:'IBM Plex Mono', monospace; font-size:0.72rem; color:var(--sandstone-deep); letter-spacing:.1em; text-transform:uppercase; margin-bottom:12px; display:block; }
 .page-head h1{ font-size:clamp(1.8rem,4vw,2.6rem); }
 .steps-bar{
-display:flex; gap:0; margin-bottom:36px; border:1px solid var(--line); border-radius:var(--radius); overflow:hidden;
+  display:flex; gap:0; margin-bottom:36px; border:1px solid var(--line); border-radius:var(--radius); overflow:hidden;
 }
 .step-pill{
-flex:1; text-align:center; padding:12px 8px;
-font-family:'IBM Plex Mono', monospace; font-size:0.7rem; text-transform:uppercase; letter-spacing:.06em;
-background:var(--ivory-dim); color:var(--ink-soft); border-right:1px solid var(--line);
+  flex:1; text-align:center; padding:12px 8px;
+  font-family:'IBM Plex Mono', monospace; font-size:0.7rem; text-transform:uppercase; letter-spacing:.06em;
+  background:var(--ivory-dim); color:var(--ink-soft); border-right:1px solid var(--line);
 }
 .step-pill:last-child{ border-right:none; }
 .step-pill.active{ background:var(--sandstone); color:var(--ivory); }
@@ -47,8 +47,8 @@ background:var(--ivory-dim); color:var(--ink-soft); border-right:1px solid var(-
 .field{ margin-bottom:20px; }
 .field label{ display:block; font-family:'IBM Plex Mono', monospace; font-size:0.72rem; text-transform:uppercase; letter-spacing:.06em; margin-bottom:8px; color:var(--ink-soft); }
 .field input, .field select, .field textarea{
-width:100%; padding:14px 16px; border:1px solid var(--line); background:var(--ivory);
-font-family:'Work Sans', sans-serif; font-size:0.95rem; color:var(--ink); border-radius:var(--radius); outline:none;
+  width:100%; padding:14px 16px; border:1px solid var(--line); background:var(--ivory);
+  font-family:'Work Sans', sans-serif; font-size:0.95rem; color:var(--ink); border-radius:var(--radius); outline:none;
 }
 .field input:focus, .field select:focus, .field textarea:focus{ border-color:var(--sandstone); }
 .field textarea{ min-height:90px; resize:vertical; }
@@ -60,23 +60,23 @@ font-family:'Work Sans', sans-serif; font-size:0.95rem; color:var(--ink); border
 .slot-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
 @media(max-width:520px){ .slot-grid{ grid-template-columns:repeat(2,1fr); } }
 .slot{
-border:1px solid var(--line); background:var(--ivory-dim); padding:12px 8px; text-align:center;
-font-family:'IBM Plex Mono', monospace; font-size:0.76rem; cursor:pointer; border-radius:var(--radius); transition:all .15s;
+  border:1px solid var(--line); background:var(--ivory-dim); padding:12px 8px; text-align:center;
+  font-family:'IBM Plex Mono', monospace; font-size:0.76rem; cursor:pointer; border-radius:var(--radius); transition:all .15s;
 }
 .slot.active{ background:var(--sandstone); color:var(--ivory); border-color:var(--sandstone); }
 .slot:hover{ border-color:var(--sandstone-deep); }
 .btn-row{ display:flex; gap:12px; margin-top:8px; flex-wrap:wrap; }
 .submit-btn, .secondary-btn{
-flex:1; min-width:140px; padding:16px; font-family:'IBM Plex Mono', monospace; font-size:0.8rem;
-text-transform:uppercase; letter-spacing:.06em; border-radius:var(--radius); cursor:pointer; transition:background .2s;
+  flex:1; min-width:140px; padding:16px; font-family:'IBM Plex Mono', monospace; font-size:0.8rem;
+  text-transform:uppercase; letter-spacing:.06em; border-radius:var(--radius); cursor:pointer; transition:background .2s;
 }
 .submit-btn{
-background:var(--sandstone); color:var(--ivory); border:1px solid var(--sandstone);
+  background:var(--sandstone); color:var(--ivory); border:1px solid var(--sandstone);
 }
 .submit-btn:hover{ background:var(--sandstone-deep); }
 .submit-btn:disabled{ opacity:.6; cursor:not-allowed; }
 .secondary-btn{
-background:transparent; color:var(--ink); border:1px solid var(--ink);
+  background:transparent; color:var(--ink); border:1px solid var(--ink);
 }
 .secondary-btn:hover{ background:var(--ink); color:var(--ivory); }
 .form-note{ font-size:0.78rem; color:var(--ink-soft); margin-top:14px; text-align:center; }
@@ -85,8 +85,8 @@ background:transparent; color:var(--ink); border:1px solid var(--ink);
 .upi-id-row{ display:flex; align-items:center; justify-content:center; gap:10px; flex-wrap:wrap; margin-bottom:10px; }
 .upi-id-row .mono{ font-size:0.82rem; background:var(--ivory); border:1px solid var(--line); padding:6px 10px; border-radius:var(--radius); }
 .copy-btn{
-font-family:'IBM Plex Mono', monospace; font-size:0.7rem; text-transform:uppercase; letter-spacing:.05em;
-background:var(--ink); color:var(--ivory); border:none; padding:6px 12px; border-radius:var(--radius); cursor:pointer;
+  font-family:'IBM Plex Mono', monospace; font-size:0.7rem; text-transform:uppercase; letter-spacing:.05em;
+  background:var(--ink); color:var(--ivory); border:none; padding:6px 12px; border-radius:var(--radius); cursor:pointer;
 }
 .copy-btn:hover{ background:var(--sandstone-deep); }
 .copy-btn.copied{ background:var(--ok); }
@@ -104,18 +104,18 @@ background:var(--ink); color:var(--ivory); border:none; padding:6px 12px; border
 .summary-total .lbl{ font-family:'IBM Plex Mono', monospace; font-size:0.68rem; text-transform:uppercase; color:rgba(245,239,227,0.65); }
 .summary-fine{ font-size:0.78rem; color:rgba(245,239,227,0.6); margin-top:16px; }
 .success-overlay{
-position:fixed; inset:0; background:rgba(28,36,48,0.92); display:none; align-items:center; justify-content:center; z-index:100; padding:24px;
+  position:fixed; inset:0; background:rgba(28,36,48,0.92); display:none; align-items:center; justify-content:center; z-index:100; padding:24px;
 }
 .success-overlay.show{ display:flex; }
 .success-box{ background:var(--ivory); padding:44px 36px; max-width:420px; text-align:center; border-radius:var(--radius); animation: popIn 0.35s cubic-bezier(0.34,1.56,0.64,1); }
 .success-box .check{
-width:64px; height:64px; margin:0 auto 20px; border-radius:50%; background:var(--ok);
-display:flex; align-items:center; justify-content:center;
-animation: checkPop 0.45s cubic-bezier(0.34,1.56,0.64,1) 0.1s both;
+  width:64px; height:64px; margin:0 auto 20px; border-radius:50%; background:var(--ok);
+  display:flex; align-items:center; justify-content:center;
+  animation: checkPop 0.45s cubic-bezier(0.34,1.56,0.64,1) 0.1s both;
 }
 .success-box .check svg path{
-stroke-dasharray:24; stroke-dashoffset:24;
-animation: drawCheck 0.4s ease-out 0.45s forwards;
+  stroke-dasharray:24; stroke-dashoffset:24;
+  animation: drawCheck 0.4s ease-out 0.45s forwards;
 }
 @keyframes popIn{ from{ opacity:0; transform:scale(0.9); } to{ opacity:1; transform:scale(1); } }
 @keyframes checkPop{ from{ transform:scale(0); } to{ transform:scale(1); } }
@@ -124,6 +124,7 @@ animation: drawCheck 0.4s ease-out 0.45s forwards;
 .success-box p{ color:var(--ink-soft); font-size:0.92rem; margin-bottom:24px; }
 .success-box .ref{ font-family:'IBM Plex Mono', monospace; font-size:0.76rem; background:var(--ivory-dim); padding:10px; border-radius:var(--radius); word-break:break-all; margin-bottom:24px; }
 .success-box .tagline{ font-size:0.8rem; color:var(--sandstone-deep); font-weight:500; margin-top:-14px; margin-bottom:24px; }
+.notif-banner{ font-size:0.76rem; color:var(--ink-soft); margin-top:-10px; margin-bottom:20px; }
 </style>
 </head>
 <body>
@@ -162,9 +163,9 @@ animation: drawCheck 0.4s ease-out 0.45s forwards;
 <span class="field-error">Enter a valid 10-digit mobile number.</span>
 </div>
 <div class="field" id="f-email">
-<label for="email">Email (required)</label>
-<input type="email" id="email" placeholder="you@example.com" required>
-<span class="field-error">Enter a valid email — confirmation will be sent here.</span>
+<label for="email">Email (optional)</label>
+<input type="email" id="email" placeholder="you@example.com">
+<span class="field-error">Enter a valid email.</span>
 </div>
 </div>
 <div class="field" id="f-address">
@@ -236,7 +237,7 @@ animation: drawCheck 0.4s ease-out 0.45s forwards;
 <button type="button" class="secondary-btn" id="backTo2">← Back</button>
 <button type="submit" class="submit-btn" id="payBtn">Submit &amp; Confirm Visit</button>
 </div>
-<p class="form-note">Your visit will be confirmed once we verify the payment against this UTR (usually within a few hours). You will get an email update.</p>
+<p class="form-note">Your visit will be confirmed once we verify the payment against this UTR (usually within a few hours). Check the Status page — no email will be sent.</p>
 </div>
 </form>
 <aside class="summary-card">
@@ -253,11 +254,12 @@ animation: drawCheck 0.4s ease-out 0.45s forwards;
 <span class="amt">₹199</span>
 </div>
 </div>
-<p class="summary-fine">₹199 is adjusted against your first month's rent if you finalise this flat. Confirmation email will be sent after payment verification.</p>
+<p class="summary-fine">₹199 is adjusted against your first month's rent if you finalise this flat. Track status on the Status page — no email is sent.</p>
 </aside>
 </div>
 </div>
 </main>
+
 <div class="success-overlay" id="successOverlay">
 <div class="success-box">
 <div class="check">
@@ -267,13 +269,15 @@ animation: drawCheck 0.4s ease-out 0.45s forwards;
 <p id="successMsg">Save your Booking ID. We will verify the UTR shortly.</p>
 <div class="ref" id="successRef">Booking ID: —</div>
 <div class="ref" id="successUtr" style="margin-top:8px;">UTR: —</div>
-<p class="tagline" style="margin-top:8px;margin-bottom:12px;">Check status anytime on the <a href="status.html" style="color:var(--sandstone-deep);text-decoration:underline;">Status / Notice page</a> using this Booking ID + your mobile. You will also get an email when confirmed.</p>
+<p class="tagline" style="margin-top:8px;margin-bottom:4px;">Check status anytime on the <a href="status.html" style="color:var(--sandstone-deep);text-decoration:underline;">Status / Notice page</a> using this Booking ID + your mobile.</p>
+<p class="notif-banner" id="notifBanner"></p>
 <div style="display:flex;flex-direction:column;gap:10px;align-items:center;">
 <a href="status.html" class="submit-btn" style="display:inline-block; text-decoration:none; max-width:260px;text-align:center;">Check Status</a>
 <a href="index.html" class="secondary-btn" style="display:inline-block; text-decoration:none; max-width:260px;text-align:center;padding:12px;">Back to Listings</a>
 </div>
 </div>
 </div>
+
 <script>
 const params = new URLSearchParams(window.location.search);
 const propId = params.get('id') || '';
@@ -324,7 +328,7 @@ function validateStep1(){
   if (!/^[6-9]\d{9}$/.test(mobile)){ setInvalid('f-mobile', true); ok = false; } else setInvalid('f-mobile', false);
 
   const email = document.getElementById('email').value.trim();
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ setInvalid('f-email', true); ok = false; } else setInvalid('f-email', false);
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ setInvalid('f-email', true); ok = false; } else setInvalid('f-email', false);
 
   const address = document.getElementById('address').value.trim();
   if (address.length < 8){ setInvalid('f-address', true); ok = false; } else setInvalid('f-address', false);
@@ -339,7 +343,6 @@ function validateStep1(){
     document.getElementById('f-time').classList.remove('invalid');
     document.getElementById('slotError').style.display = 'none';
   }
-
   return ok;
 }
 
@@ -354,14 +357,12 @@ function goToStep(n){
   currentStep = n;
   document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
   document.getElementById('step' + n).classList.add('active');
-
   document.querySelectorAll('.step-pill').forEach(pill => {
     const s = Number(pill.dataset.step);
     pill.classList.remove('active', 'done');
     if (s === n) pill.classList.add('active');
     else if (s < n) pill.classList.add('done');
   });
-
   const titles = {
     1: 'Your details',
     2: 'Pay the booking fee',
@@ -382,14 +383,12 @@ document.getElementById('toStep2').addEventListener('click', function(){
 document.getElementById('toStep3').addEventListener('click', function(){
   goToStep(3);
 });
-
 document.getElementById('backTo1').addEventListener('click', function(){ goToStep(1); });
 document.getElementById('backTo2').addEventListener('click', function(){ goToStep(2); });
 
 const UPI_ID = "aaryanjangir@fam";
 const PAYEE_NAME = "High Standard Apartment";
 const BOOKING_FEE_INR = 199;
-
 const upiLink = `upi://pay?pa=${encodeURIComponent(UPI_ID)}&pn=${encodeURIComponent(PAYEE_NAME)}&am=${BOOKING_FEE_INR}&cu=INR&tn=${encodeURIComponent('Visit Booking - ' + propTitle)}`;
 document.getElementById('qrImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(upiLink)}`;
 document.getElementById('upiIdText').textContent = 'UPI ID: ' + UPI_ID;
@@ -402,7 +401,55 @@ document.getElementById('copyUpiBtn').addEventListener('click', function(){
   });
 });
 
-document.getElementById('bookingForm').addEventListener('submit', function(e){
+// Ask for notification permission early (on page load) so the popup isn't
+// happening for the first time right when the user submits the form.
+if ('Notification' in window && Notification.permission === 'default') {
+  // We wait for the first user click anywhere on the page before asking,
+  // since Chrome can silently ignore permission requests with no user gesture.
+  document.addEventListener('click', function requestOnce(){
+    Notification.requestPermission();
+    document.removeEventListener('click', requestOnce);
+  }, { once: true });
+}
+
+function showBookingNotification(d){
+  const banner = document.getElementById('notifBanner');
+  if (!('Notification' in window)) {
+    if (banner) banner.textContent = 'Your browser does not support notifications — details are saved above.';
+    return;
+  }
+  const title = 'Visit Request Submitted — ' + d.bookingId;
+  const body =
+    'Name: ' + d.name +
+    '\nFlat: ' + d.propertyTitle + (d.area ? ' (' + d.area + ')' : '') +
+    '\nVisit: ' + (d.visitDate || '—') + ' · ' + (d.visitSlot || '—') +
+    '\nUTR: ' + d.utr;
+
+  function fire(){
+    try {
+      new Notification(title, { body: body });
+      if (banner) banner.textContent = 'A notification with your booking details has been sent to Chrome.';
+    } catch (e) {
+      if (banner) banner.textContent = 'Details are saved above — notification could not be shown.';
+    }
+  }
+
+  if (Notification.permission === 'granted') {
+    fire();
+  } else if (Notification.permission !== 'denied') {
+    Notification.requestPermission().then(function(perm){
+      if (perm === 'granted') fire();
+      else if (banner) banner.textContent = 'Notifications are blocked — your details are saved above.';
+    });
+  } else if (banner) {
+    banner.textContent = 'Notifications are blocked in your browser — your details are saved above.';
+  }
+}
+
+// Vercel serverless API — same-origin, so a normal fetch (no more no-cors hack)
+const API_URL = '/api/booking';
+
+document.getElementById('bookingForm').addEventListener('submit', async function(e){
   e.preventDefault();
   if (currentStep !== 3) return;
 
@@ -439,49 +486,67 @@ document.getElementById('bookingForm').addEventListener('submit', function(e){
     utr: document.getElementById('utr').value.trim()
   };
 
-  fetch('/api/booking', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(bookingDetails)
-  })
-    .then(function (r) { return r.json(); })
-    .then(function (result) {
-      if (!result || !result.ok) {
-        throw new Error((result && result.error) || 'Unknown error');
-      }
+  let finalBookingId = bookingId;
+  let submitError = null;
 
-      try {
-        localStorage.setItem('hsa_last_booking', JSON.stringify({
-          bookingId: bookingId,
-          mobile: bookingDetails.mobile,
-          email: bookingDetails.email,
-          name: bookingDetails.name,
-          propertyTitle: propTitle,
-          area: propArea,
-          visitDate: bookingDetails.visitDate,
-          visitSlot: selectedSlot,
-          utr: bookingDetails.utr,
-          status: 'Pending',
-          savedAt: Date.now()
-        }));
-      } catch (e) {}
-
-      document.getElementById('successMsg').textContent =
-        'Save your Booking ID. We will email you as soon as your visit is confirmed.';
-      document.getElementById('successRef').textContent = 'Booking ID: ' + bookingId;
-      document.getElementById('successUtr').textContent = 'UTR: ' + bookingDetails.utr;
-      document.getElementById('successOverlay').classList.add('show');
-    })
-    .catch(function (err) {
-      console.error('Could not send booking:', err);
-      alert('Sorry, your request could not be submitted right now. Please try again in a moment, or contact us directly.');
-    })
-    .finally(function () {
-      payBtn.disabled = false;
-      payBtn.textContent = 'Submit & Confirm Visit';
+  try {
+    const resp = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(bookingDetails)
     });
+    const result = await resp.json();
+    if (result && result.ok) {
+      finalBookingId = result.bookingId || bookingId;
+    } else {
+      submitError = (result && result.error) || 'Server error';
+    }
+  } catch (err) {
+    console.error('Could not send booking:', err);
+    submitError = 'Could not reach server';
+  }
+
+  payBtn.disabled = false;
+  payBtn.textContent = 'Submit & Confirm Visit';
+
+  if (submitError) {
+    alert('Could not submit your booking (' + submitError + '). Please check your internet connection and try again.');
+    return;
+  }
+
+  try {
+    localStorage.setItem('hsa_last_booking', JSON.stringify({
+      bookingId: finalBookingId,
+      mobile: bookingDetails.mobile,
+      email: bookingDetails.email,
+      name: bookingDetails.name,
+      propertyTitle: propTitle,
+      area: propArea,
+      visitDate: bookingDetails.visitDate,
+      visitSlot: selectedSlot,
+      utr: bookingDetails.utr,
+      status: 'Pending',
+      savedAt: Date.now()
+    }));
+  } catch (e) {}
+
+  document.getElementById('successMsg').textContent = 'Save your Booking ID. Check status anytime on the Notice page.';
+  document.getElementById('successRef').textContent = 'Booking ID: ' + finalBookingId;
+  document.getElementById('successUtr').textContent = 'UTR: ' + bookingDetails.utr;
+  document.getElementById('successOverlay').classList.add('show');
+
+  showBookingNotification({
+    bookingId: finalBookingId,
+    name: bookingDetails.name,
+    propertyTitle: propTitle,
+    area: propArea,
+    visitDate: bookingDetails.visitDate,
+    visitSlot: selectedSlot,
+    utr: bookingDetails.utr
+  });
 });
 </script>
+
 <script>
 (function(){
   try {
