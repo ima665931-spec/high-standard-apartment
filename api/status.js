@@ -1,4 +1,4 @@
-const { redis } = require('./_lib/redis');
+const { redis, redisConfigured } = require('./_lib/redis');
 
 module.exports = async (req, res) => {
   const src = req.method === 'GET' ? req.query : (req.body || {});
@@ -7,6 +7,13 @@ module.exports = async (req, res) => {
 
   if (!bookingId || mobile.length !== 10) {
     return res.status(200).json({ ok: false, error: 'Booking ID and 10-digit mobile required' });
+  }
+
+  if (!redisConfigured || !redis) {
+    return res.status(200).json({
+      ok: false,
+      error: 'Database not configured — KV_REST_API_URL/TOKEN env vars are missing. Connect Upstash in Vercel → Storage, then redeploy.'
+    });
   }
 
   try {
