@@ -1,4 +1,4 @@
-const { kv } = require('@vercel/kv');
+const { redis } = require('./_lib/redis');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 
@@ -47,8 +47,8 @@ module.exports = async (req, res) => {
       .slice(0, 24);
     record.token = token;
 
-    // Save to Vercel KV — this is the ONLY place data is persisted now
-    await kv.set(`booking:${bookingId}`, record);
+    // Save to Redis (Upstash) — this is the ONLY place data is persisted now
+    await redis.set(`booking:${bookingId}`, record);
 
     // Build owner email (with Confirm / Reject buttons)
     const proto = req.headers['x-forwarded-proto'] || 'https';
