@@ -1,154 +1,117 @@
+const { kv } = require('@vercel/kv');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 
-function sign(bookingId, email) {
-  return crypto
-    .createHmac('sha256', process.env.TOKEN_SECRET || 'change-me')
-    .update(bookingId + '|' + email)
-    .digest('base64url')
-    .slice(0, 24);
-}
-
-function row(label, value) {
-  return (
-    '<tr><td style="padding:6px 8px;border-bottom:1px solid #eee;color:#666;width:140px">' +
-    label +
-    '</td><td style="padding:6px 8px;border-bottom:1px solid #eee">' +
-    (value || '—') +
-    '</td></tr>'
-  );
-}
-
-function getTransporter() {
-  return nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: Number(process.env.SMTP_PORT || 465),
-    secure: String(process.env.SMTP_SECURE || 'true') === 'true',
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
-    },
-  });
-}
-
 module.exports = async (req, res) => {
   if (req.method !== 'POST') {
-    res.status(405).json({ ok: false, error: 'Method not allowed' });
-    return;
+    return res.status(405).json({ ok: false, error: 'Method not allowed' });
   }
 
   try {
-    // Vercel parses JSON bodies automatically when Content-Type is application/json.
-    // booking.html sends it as text/plain (for simplicity), so parse manually if needed.
-    let data = req.body;
-    if (typeof data === 'string') {
-      try {
-        data = JSON.parse(data);
-      } catch (e) {
-        data = {};
-      }
+    const data = req.body || {};
+
+    let bookingId = String(data.bookingId || '').trim().toUpperCase();
+    if (!bookingId) {
+      bookingId = 'HSA-' + crypto.randomBytes(4).toString('hex').toUpperCase();
     }
-    data = data || {};
 
-    const bookingId = String(
-      data.bookingId || 'HSA-' + Date.now().toString(36).toUpperCase()
-    ).toUpperCase();
-    const name = data.name || '';
-    const email = data.email || '';
+    const mobile = String(data.mobile || '').replace(/\D/g, '').slice(-10);
 
-    const transporter = getTransporter();
+    const record = {
+      bookingId,
+      name: data.name || '',
+      mobile,
+      email: data.email || '',
+      address: data.address || '',
+      visitors: data.visitors || '',
+      visitDate: data.visitDate || '',
+      visitSlot: data.visitSlot || '',
+      propertyId: data.propertyId || '',
+      propertyTitle: data.propertyTitle || '',
+      area: data.area || '',
+      bhk: data.bhk || '',
+      rent: data.rent || '',
+      deposit: data.deposit || '',
+      amount: data.amount || 199,
+      utr: data.utr || '',
+      notes: data.notes || '',
+      status: 'Pending',
+      createdAt: new Date().toISOString()
+    };
 
+    // Token used to authorize the Confirm / Reject links sent to the owner
+    const token = crypto
+      .createHmac('sha256', process.env.TOKEN_SECRET || 'change-me')
+      .update(bookingId + '|' + record.email)
+      .digest('base64url')
+      .slice(0, 24);
+    record.token = token;
+
+    // Save to Vercel KV — this is the ONLY place data is persisted now
+    await kv.set(`booking:${bookingId}`, record);
+
+    // Build owner email (with Confirm / Reject buttons)
     const proto = req.headers['x-forwarded-proto'] || 'https';
-    const base = proto + '://' + req.headers.host;
+    const baseUrl = `${proto}://${req.headers.host}`;
+    const confirmUrl = `${baseUrl}/api/decision?action=confirm&id=${encodeURIComponent(bookingId)}&t=${encodeURIComponent(token)}`;
+    const rejectUrl = `${baseUrl}/api/decision?action=reject&id=${encodeURIComponent(bookingId)}&t=${encodeURIComponent(token)}`;
 
-    let ownerHtml =
+    const row = (label, value) =>
+      `<tr><td style="padding:6px 8px;border-bottom:1px solid #eee;color:#666;width:140px">${label}</td>` +
+      `<td style="padding:6px 8px;border-bottom:1px solid #eee">${value || '—'}</td></tr>`;
+
+    const ownerHtml =
       '<div style="font-family:Arial,sans-serif;max-width:560px;line-height:1.5">' +
       '<h2 style="color:#1C2430">New Visit Booking</h2>' +
-      '<p><b>Booking ID:</b> ' + bookingId + '</p>' +
+      `<p><b>Booking ID:</b> ${bookingId}</p>` +
       '<table style="border-collapse:collapse;width:100%">' +
-      row('Name', name) +
-      row('Mobile', data.mobile) +
-      row('Email', email) +
-      row('Address', data.address) +
-      row('Visitors', data.visitors) +
-      row('Visit Date', data.visitDate) +
-      row('Visit Slot', data.visitSlot) +
-      row('Flat', data.propertyTitle) +
-      row('Area', data.area) +
-      row('BHK', data.bhk) +
-      row('Rent', data.rent) +
-      row('Deposit', data.deposit) +
-      row('Fee', 'Rs. ' + (data.amount || 199)) +
-      row('UTR', '<b style="color:#B85C33">' + (data.utr || '') + '</b>') +
-      row('Notes', data.notes) +
-      '</table>';
+      row('Name', record.name) +
+      row('Mobile', record.mobile) +
+      row('Email', record.email) +
+      row('Address', record.address) +
+      row('Visitors', record.visitors) +
+      row('Visit Date', record.visitDate) +
+      row('Visit Slot', record.visitSlot) +
+      row('Flat', record.propertyTitle) +
+      row('Area', record.area) +
+      row('BHK', record.bhk) +
+      row('Rent', record.rent) +
+      row('Deposit', record.deposit) +
+      row('Fee', 'Rs. ' + record.amount) +
+      row('UTR', `<b style="color:#B85C33">${record.utr}</b>`) +
+      row('Notes', record.notes) +
+      '</table>' +
+      '<p style="margin-top:24px">Verify UTR, then choose:</p>' +
+      '<p>' +
+      `<a href="${confirmUrl}" style="display:inline-block;background:#3E7A52;color:#fff;padding:12px 20px;text-decoration:none;border-radius:4px;margin-right:12px">Visit Confirmed</a>` +
+      `<a href="${rejectUrl}" style="display:inline-block;background:#A23B3B;color:#fff;padding:12px 20px;text-decoration:none;border-radius:4px">Visit Not Confirmed</a>` +
+      '</p>' +
+      '<p style="margin-top:16px;color:#888;font-size:12px">Customer will NOT receive any email — they will see the status on the website\'s Status page.</p>' +
+      '</div>';
 
     try {
-      const token = sign(bookingId, email);
-      const confirmUrl =
-        base +
-        '/api/decision?action=confirm&id=' +
-        encodeURIComponent(bookingId) +
-        '&email=' +
-        encodeURIComponent(email) +
-        '&name=' +
-        encodeURIComponent(name) +
-        '&t=' +
-        encodeURIComponent(token);
-      const rejectUrl =
-        base +
-        '/api/decision?action=reject&id=' +
-        encodeURIComponent(bookingId) +
-        '&email=' +
-        encodeURIComponent(email) +
-        '&name=' +
-        encodeURIComponent(name) +
-        '&t=' +
-        encodeURIComponent(token);
+      const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: process.env.GMAIL_USER,
+          pass: process.env.GMAIL_APP_PASSWORD
+        }
+      });
 
-      ownerHtml +=
-        '<p style="margin-top:24px">Verify UTR, then choose:</p>' +
-        '<p>' +
-        '<a href="' + confirmUrl + '" style="display:inline-block;background:#3E7A52;color:#fff;padding:12px 20px;text-decoration:none;border-radius:4px;margin-right:12px">Visit Confirmed</a>' +
-        '<a href="' + rejectUrl + '" style="display:inline-block;background:#A23B3B;color:#fff;padding:12px 20px;text-decoration:none;border-radius:4px">Visit Not Confirmed</a>' +
-        '</p>';
-    } catch (eTok) {
-      ownerHtml += '<p style="color:#A23B3B">Token/buttons error: ' + eTok + '</p>';
-    }
-    ownerHtml += '</div>';
-
-    // 1) Email the owner FIRST — this is the whole point.
-    await transporter.sendMail({
-      from: '"High Standard Apartment" <' + process.env.SMTP_USER + '>',
-      to: process.env.OWNER_EMAIL,
-      subject: 'New Visit Booking — ' + (name || bookingId),
-      html: ownerHtml,
-    });
-
-    // 2) Ack email to the customer (best-effort, don't fail the request if this fails).
-    if (email) {
-      try {
-        await transporter.sendMail({
-          from: '"High Standard Apartment" <' + process.env.SMTP_USER + '>',
-          to: email,
-          subject: 'We received your visit request — High Standard Apartment',
-          html:
-            '<div style="font-family:Arial,sans-serif;max-width:520px">' +
-            '<h2>Request received</h2>' +
-            '<p>Hi ' + (name || '') + ',</p>' +
-            '<p>We got your visit booking for <b>' + (data.propertyTitle || 'the flat') + '</b>.</p>' +
-            '<p><b>Booking ID: ' + bookingId + '</b><br>UTR: ' + (data.utr || '') + '</p>' +
-            '<p>You will get an email as soon as we verify the payment and confirm your visit.</p>' +
-            '<p>— High Standard Apartment, Jaipur</p></div>',
-        });
-      } catch (eUser) {
-        console.error('User ack email failed:', eUser);
-      }
+      await transporter.sendMail({
+        from: `"High Standard Apartment" <${process.env.GMAIL_USER}>`,
+        to: process.env.OWNER_EMAIL,
+        subject: `New Visit Booking — ${record.name || bookingId}`,
+        html: ownerHtml
+      });
+    } catch (mailErr) {
+      // Booking is already saved to KV even if the email fails — log it, don't fail the request
+      console.error('Owner email failed:', mailErr);
     }
 
-    res.status(200).json({ ok: true, bookingId: bookingId });
+    return res.status(200).json({ ok: true, bookingId });
   } catch (err) {
     console.error('Booking error:', err);
-    res.status(500).json({ ok: false, error: String(err && err.message ? err.message : err) });
+    return res.status(500).json({ ok: false, error: String((err && err.message) || err) });
   }
 };
