@@ -1,4 +1,4 @@
-const { redis } = require('./_lib/redis');
+const { redis, redisConfigured } = require('./_lib/redis');
 
 module.exports = async (req, res) => {
   const { id, t, action } = req.query;
@@ -6,6 +6,10 @@ module.exports = async (req, res) => {
 
   if (!bookingId || !t || (action !== 'confirm' && action !== 'reject')) {
     return htmlPage(res, 'Error', 'Invalid link.');
+  }
+
+  if (!redisConfigured || !redis) {
+    return htmlPage(res, 'Error', 'Database not configured — KV_REST_API_URL/TOKEN env vars are missing.');
   }
 
   try {
