@@ -1,4 +1,4 @@
-const { redis, redisConfigured } = require('./_lib/redis');
+const { redis, redisConfigured } = require('../_lib/redis');
 
 module.exports = async (req, res) => {
   const src = req.method === 'GET' ? req.query : (req.body || {});

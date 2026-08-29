@@ -1,4 +1,4 @@
-const { redis, redisConfigured } = require('./_lib/redis');
+const { redis, redisConfigured } = require('../_lib/redis');
 
 module.exports = async (req, res) => {
   const { id, t, action } = req.query;
@@ -31,6 +31,7 @@ module.exports = async (req, res) => {
 
     // No email to customer here — they will see it on the Status page.
     return htmlPage(
+      res,
       newStatus,
       `Booking <b>${bookingId}</b> marked as <b>${newStatus}</b>. Customer has NOT been emailed — they will see this when they check status on the website.`
     );

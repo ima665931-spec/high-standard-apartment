@@ -1,4 +1,4 @@
-const { redis, redisConfigured } = require('./_lib/redis');
+const { redis, redisConfigured } = require('../_lib/redis');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 
