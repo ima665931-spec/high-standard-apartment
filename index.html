@@ -60,11 +60,11 @@
   .hero-stats .num{ font-family:'Fraunces', serif; font-size:1.9rem; font-weight:600; }
   .hero-stats .lbl{ font-family:'IBM Plex Mono', monospace; font-size:0.66rem; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-soft); }
 
-  .arch-frame{ position:relative; width:100%; aspect-ratio: 3/4; }
-  .arch-frame svg{ width:100%; height:100%; display:block; }
-  .arch-photo{ position:absolute; top:6%; left:9%; right:9%; bottom:4%; clip-path: path('M0,420 L0,120 C0,40 60,0 155,0 C250,0 310,40 310,120 L310,420 Z'); background: linear-gradient(160deg, #cfa574 0%, #9c6b45 45%, #5b3a2a 100%); overflow:hidden; }
-  .arch-photo::after{ content:''; position:absolute; inset:0; background: radial-gradient(circle at 30% 20%, rgba(255,255,255,0.18), transparent 40%), repeating-linear-gradient(0deg, rgba(255,255,255,0.03) 0 2px, transparent 2px 26px); }
-  .arch-photo .skyline{ position:absolute; bottom:0; left:0; right:0; height:46%; background: linear-gradient(180deg, transparent, rgba(28,36,48,0.55)); }
+  .hero-photo{ position:relative; width:100%; aspect-ratio: 3/4; border-radius:4px; overflow:hidden; box-shadow: 0 20px 50px rgba(28,36,48,0.12); }
+  .hero-photo img{ width:100%; height:100%; object-fit:cover; display:block; }
+  @media(max-width:900px){
+    .hero-photo{ aspect-ratio: 16/10; max-height:320px; }
+  }
 
   .strip{ background:var(--ink); color:var(--ivory-dim); padding:14px 0; overflow:hidden; white-space:nowrap; }
   .strip .track{ display:inline-flex; animation: scroll 28s linear infinite; font-family:'IBM Plex Mono', monospace; font-size:0.74rem; letter-spacing:.1em; text-transform:uppercase; }
@@ -104,9 +104,16 @@
   .listing-body h3{ font-size:1.15rem; }
   .listing-area{ font-family:'IBM Plex Mono', monospace; font-size:0.72rem; color:var(--sandstone-deep); text-transform:uppercase; letter-spacing:.05em; }
   .listing-meta{ display:flex; gap:16px; color:var(--ink-soft); font-size:0.84rem; margin:4px 0 6px; }
-  .listing-price{ display:flex; align-items:baseline; gap:6px; margin-top:auto; padding-top:14px; border-top:1px solid var(--line); }
-  .listing-price .amt{ font-family:'Fraunces', serif; font-weight:600; font-size:1.3rem; }
-  .listing-price .per{ font-family:'IBM Plex Mono', monospace; font-size:0.7rem; color:var(--ink-soft); }
+  .listing-price{ display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 8px; margin-top:auto; padding-top:14px; border-top:1px solid var(--line); overflow:visible; }
+  .listing-price .amt{ font-family:'Fraunces', serif; font-weight:600; font-size:1.25rem; white-space:nowrap; letter-spacing:0; color:var(--ink); }
+  .listing-price .amt .per{ font-family:'IBM Plex Mono', monospace; font-size:0.72rem; font-weight:400; color:var(--ink-soft); margin-left:4px; }
+  .listing-price > .per{ font-family:'IBM Plex Mono', monospace; font-size:0.68rem; color:var(--ink-soft); white-space:nowrap; }
+  @media(max-width:420px){
+    .listing-price{ flex-direction:column; align-items:flex-start; gap:2px; }
+    .listing-price .amt{ font-size:1.2rem; }
+  }
+  .listing-body{ overflow:visible; min-width:0; }
+  .listing-card{ overflow:visible; min-width:0; }
   .listing-book{
     display:block; text-align:center; margin-top:14px; padding:11px; background:var(--sandstone); color:var(--ivory);
     font-family:'IBM Plex Mono', monospace; font-size:0.72rem; text-transform:uppercase; letter-spacing:.06em;
@@ -189,12 +196,8 @@
         <div><span class="num">₹199</span><span class="lbl">Visit Booking Fee</span></div>
       </div>
     </div>
-    <div class="arch-frame">
-      <svg viewBox="0 0 320 440" preserveAspectRatio="xMidYMid meet">
-        <path d="M6,434 L6,124 C6,44 68,6 160,6 C252,6 314,44 314,124 L314,434" fill="none" stroke="#1C2430" stroke-width="2"/>
-        <path d="M20,434 L20,128 C20,58 76,22 160,22 C244,22 300,58 300,128 L300,434" fill="none" stroke="#B85C33" stroke-width="1"/>
-      </svg>
-      <div class="arch-photo"><div class="skyline"></div></div>
+    <div class="hero-photo">
+      <img src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=900&q=80" alt="Modern apartment building in Jaipur" loading="eager">
     </div>
   </div>
 </section>
@@ -441,8 +444,8 @@
             <span>${l.size}</span><span>·</span><span>${l.furnish}</span>
           </div>
           <div class="listing-price">
-            <span class="amt">₹${l.rent.toLocaleString('en-IN')}</span>
-            <span class="per">/ month · deposit ₹${l.deposit.toLocaleString('en-IN')}</span>
+            <span class="amt">₹${l.rent.toLocaleString('en-IN')}<span class="per"> /month</span></span>
+            <span class="per">Deposit ₹${l.deposit.toLocaleString('en-IN')}</span>
           </div>
           <a class="listing-book" href="booking.html?id=${encodeURIComponent(l.id)}&title=${encodeURIComponent(l.title)}&area=${encodeURIComponent(l.area)}&bhk=${encodeURIComponent(l.bhk)}&rent=${l.rent}&deposit=${l.deposit}">Book a Visit</a>
         </div>
