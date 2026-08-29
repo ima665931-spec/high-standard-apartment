@@ -1,4 +1,4 @@
-const { kv } = require('@vercel/kv');
+const { redis } = require('./_lib/redis');
 
 module.exports = async (req, res) => {
   const { id, t, action } = req.query;
@@ -9,7 +9,7 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const record = await kv.get(`booking:${bookingId}`);
+    const record = await redis.get(`booking:${bookingId}`);
 
     if (!record || record.token !== t) {
       return htmlPage(res, 'Error', 'Invalid or expired link.');
@@ -23,7 +23,7 @@ module.exports = async (req, res) => {
     record.status = newStatus;
     record.decidedAt = new Date().toISOString();
 
-    await kv.set(`booking:${bookingId}`, record);
+    await redis.set(`booking:${bookingId}`, record);
 
     // No email to customer here — they will see it on the Status page.
     return htmlPage(
