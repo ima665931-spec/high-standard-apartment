@@ -495,11 +495,14 @@ document.getElementById('bookingForm').addEventListener('submit', async function
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(bookingDetails)
     });
-    const result = await resp.json();
+    let result = null;
+    try { result = await resp.json(); } catch (_) {}
     if (result && result.ok) {
       finalBookingId = result.bookingId || bookingId;
+    } else if (result && result.error) {
+      submitError = result.error;
     } else {
-      submitError = (result && result.error) || 'Server error';
+      submitError = 'Server error (HTTP ' + resp.status + ')';
     }
   } catch (err) {
     console.error('Could not send booking:', err);
@@ -510,7 +513,7 @@ document.getElementById('bookingForm').addEventListener('submit', async function
   payBtn.textContent = 'Submit & Confirm Visit';
 
   if (submitError) {
-    alert('Could not submit your booking (' + submitError + '). Please check your internet connection and try again.');
+    alert('Could not submit your booking: ' + submitError + '\n\nIf this keeps happening, contact the owner.');
     return;
   }
 
