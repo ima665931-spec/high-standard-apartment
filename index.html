@@ -183,10 +183,10 @@
         <a href="#how" class="cta-btn" style="background:transparent;color:var(--ink);border-color:var(--ink);">How It Works</a>
       </div>
       <div class="hero-stats">
-        <div><span class="num">240+</span><span class="lbl">Flats Listed</span></div>
-        <div><span class="num">9</span><span class="lbl">Areas Covered</span></div>
+        <div><span class="num">16+</span><span class="lbl">Verified Listings</span></div>
+        <div><span class="num">12</span><span class="lbl">Areas Covered</span></div>
         <div><span class="num">100%</span><span class="lbl">Verified Owners</span></div>
-        <div><span class="num">₹499</span><span class="lbl">Visit Booking Fee</span></div>
+        <div><span class="num">₹199</span><span class="lbl">Visit Booking Fee</span></div>
       </div>
     </div>
     <div class="arch-frame">
@@ -341,7 +341,7 @@
       <div class="step">
         <span class="tag">03 — Pay</span>
         <h3>Confirm with a small fee</h3>
-        <p>Pay a refundable booking fee via Razorpay to lock in your visit slot.</p>
+        <p>Pay a small booking fee (₹199) via UPI to lock in your visit slot.</p>
       </div>
       <div class="step">
         <span class="tag">04 — Move in</span>
@@ -401,7 +401,7 @@
 
   // If a panel URL is configured, try loading live listings from your Google Sheet.
   // Falls back to the hardcoded list above if it fails or isn't set up yet.
-  if (PANEL_URL && PANEL_URL.indexOf('https://script.google.com/macros/s/AKfycby0YChLKn8I5nLurKf4pFtupmf-4Tm9kxVI3Kjv0HFbyPFTZ2_sLfPrnVdc1ENwmTRaYA/exec') === -1) {
+  if (PANEL_URL && PANEL_URL.indexOf('YOUR_APPS_SCRIPT_URL_HERE') === -1) {
     fetch(PANEL_URL)
       .then(r => r.json())
       .then(data => {

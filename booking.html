@@ -30,22 +30,33 @@
   .back-link:hover{ color:var(--sandstone-deep); }
 
   main{ padding:56px 0 100px; }
-  .page-head{ margin-bottom:40px; }
+  .page-head{ margin-bottom:28px; }
   .num-tag{ font-family:'IBM Plex Mono', monospace; font-size:0.72rem; color:var(--sandstone-deep); letter-spacing:.1em; text-transform:uppercase; margin-bottom:12px; display:block; }
   .page-head h1{ font-size:clamp(1.8rem,4vw,2.6rem); }
 
-  .layout{ display:grid; grid-template-columns: 1.3fr 1fr; gap:56px; align-items:start; }
-  @media(max-width:860px){ .layout{ grid-template-columns:1fr; } }
-
-  /* --- form --- */
-  .field{ margin-bottom:22px; }
-  .field label{ display:block; font-family:'IBM Plex Mono', monospace; font-size:0.72rem; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-soft); margin-bottom:8px; }
-  .field input, .field select, .field textarea{
-    width:100%; background:var(--ivory-dim); border:1px solid var(--line); color:var(--ink);
-    padding:13px 14px; font-family:'Work Sans', sans-serif; font-size:0.95rem; border-radius:var(--radius);
+  .steps-bar{
+    display:flex; gap:0; margin-bottom:36px; border:1px solid var(--line); border-radius:var(--radius); overflow:hidden;
   }
-  .field input:focus, .field select:focus, .field textarea:focus{ outline:2px solid var(--sandstone); outline-offset:1px; }
-  .field textarea{ resize:vertical; min-height:80px; }
+  .step-pill{
+    flex:1; text-align:center; padding:12px 8px;
+    font-family:'IBM Plex Mono', monospace; font-size:0.7rem; text-transform:uppercase; letter-spacing:.06em;
+    background:var(--ivory-dim); color:var(--ink-soft); border-right:1px solid var(--line);
+  }
+  .step-pill:last-child{ border-right:none; }
+  .step-pill.active{ background:var(--sandstone); color:var(--ivory); }
+  .step-pill.done{ background:var(--ink); color:var(--ivory); }
+
+  .layout{ display:grid; grid-template-columns: 1.3fr 1fr; gap:56px; align-items:start; }
+  @media(max-width:860px){ .layout{ grid-template-columns:1fr; gap:32px; } }
+
+  .field{ margin-bottom:20px; }
+  .field label{ display:block; font-family:'IBM Plex Mono', monospace; font-size:0.72rem; text-transform:uppercase; letter-spacing:.06em; margin-bottom:8px; color:var(--ink-soft); }
+  .field input, .field select, .field textarea{
+    width:100%; padding:14px 16px; border:1px solid var(--line); background:var(--ivory);
+    font-family:'Work Sans', sans-serif; font-size:0.95rem; color:var(--ink); border-radius:var(--radius); outline:none;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus{ border-color:var(--sandstone); }
+  .field textarea{ min-height:90px; resize:vertical; }
   .field-row{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
   @media(max-width:520px){ .field-row{ grid-template-columns:1fr; } }
   .field-error{ color:var(--error); font-size:0.78rem; margin-top:6px; display:none; font-family:'IBM Plex Mono', monospace; }
@@ -61,13 +72,20 @@
   .slot.active{ background:var(--sandstone); color:var(--ivory); border-color:var(--sandstone); }
   .slot:hover{ border-color:var(--sandstone-deep); }
 
+  .btn-row{ display:flex; gap:12px; margin-top:8px; flex-wrap:wrap; }
+  .submit-btn, .secondary-btn{
+    flex:1; min-width:140px; padding:16px; font-family:'IBM Plex Mono', monospace; font-size:0.8rem;
+    text-transform:uppercase; letter-spacing:.06em; border-radius:var(--radius); cursor:pointer; transition:background .2s;
+  }
   .submit-btn{
-    width:100%; margin-top:8px; background:var(--sandstone); color:var(--ivory); border:1px solid var(--sandstone);
-    padding:16px; font-family:'IBM Plex Mono', monospace; font-size:0.8rem; text-transform:uppercase; letter-spacing:.06em;
-    border-radius:var(--radius); cursor:pointer; transition:background .2s;
+    background:var(--sandstone); color:var(--ivory); border:1px solid var(--sandstone);
   }
   .submit-btn:hover{ background:var(--sandstone-deep); }
   .submit-btn:disabled{ opacity:.6; cursor:not-allowed; }
+  .secondary-btn{
+    background:transparent; color:var(--ink); border:1px solid var(--ink);
+  }
+  .secondary-btn:hover{ background:var(--ink); color:var(--ivory); }
   .form-note{ font-size:0.78rem; color:var(--ink-soft); margin-top:14px; text-align:center; }
 
   .qr-box{ background:var(--ivory-dim); border:1px solid var(--line); border-radius:var(--radius); padding:22px; text-align:center; }
@@ -82,7 +100,9 @@
   .copy-btn.copied{ background:var(--ok); }
   .qr-note{ font-size:0.8rem; color:var(--ink-soft); max-width:340px; margin:0 auto; }
 
-  /* --- summary card --- */
+  .step-panel{ display:none; }
+  .step-panel.active{ display:block; }
+
   .summary-card{ background:var(--ink); color:var(--ivory); padding:34px; border-radius:var(--radius); position:sticky; top:100px; }
   .summary-card .badge{ font-family:'IBM Plex Mono', monospace; font-size:0.66rem; text-transform:uppercase; letter-spacing:.06em; background:var(--sandstone); color:var(--ivory); padding:4px 10px; border-radius:var(--radius); display:inline-block; margin-bottom:16px; }
   .summary-card h2{ color:var(--ivory); font-size:1.35rem; margin-bottom:6px; }
@@ -94,7 +114,6 @@
   .summary-total .lbl{ font-family:'IBM Plex Mono', monospace; font-size:0.68rem; text-transform:uppercase; color:rgba(245,239,227,0.65); }
   .summary-fine{ font-size:0.78rem; color:rgba(245,239,227,0.6); margin-top:16px; }
 
-  /* --- success overlay --- */
   .success-overlay{
     position:fixed; inset:0; background:rgba(28,36,48,0.92); display:none; align-items:center; justify-content:center; z-index:100; padding:24px;
   }
@@ -126,7 +145,7 @@
       <div class="brand">High Standard<span class="dot">•</span>Apartment</div>
       <span class="brand-by">by Premium Market</span>
     </div>
-    <a href="index.html" class="back-link">← Back to listings</a>
+    <a href="index.html" class="back-link">&larr; Back to listings</a>
   </nav>
 </header>
 
@@ -134,95 +153,118 @@
   <div class="wrap">
     <div class="page-head">
       <span class="num-tag">Book a visit</span>
-      <h1>A few details, then pick your slot.</h1>
+      <h1 id="pageTitle">Your details</h1>
+    </div>
+
+    <div class="steps-bar" id="stepsBar">
+      <div class="step-pill active" data-step="1">1 · Details</div>
+      <div class="step-pill" data-step="2">2 · Pay ₹199</div>
+      <div class="step-pill" data-step="3">3 · UTR</div>
     </div>
 
     <div class="layout">
-      <!-- FORM -->
       <form id="bookingForm" novalidate>
-        <div class="field" id="f-name">
-          <label for="fullName">Full Name</label>
-          <input type="text" id="fullName" placeholder="e.g. Rohit Sharma" required>
-          <span class="field-error">Please enter your full name.</span>
-        </div>
 
-        <div class="field-row">
-          <div class="field" id="f-mobile">
-            <label for="mobile">Mobile Number</label>
-            <input type="tel" id="mobile" placeholder="10-digit mobile number" maxlength="10" required>
-            <span class="field-error">Enter a valid 10-digit mobile number.</span>
+        <div class="step-panel active" id="step1">
+          <div class="field" id="f-name">
+            <label for="fullName">Full Name</label>
+            <input type="text" id="fullName" placeholder="e.g. Rohit Sharma" required>
+            <span class="field-error">Please enter your full name.</span>
           </div>
-          <div class="field" id="f-email">
-            <label for="email">Email (optional)</label>
-            <input type="email" id="email" placeholder="you@example.com">
-            <span class="field-error">Enter a valid email address.</span>
-          </div>
-        </div>
 
-        <div class="field" id="f-address">
-          <label for="address">Your Current Address</label>
-          <textarea id="address" placeholder="House/Flat No., Street, Area, City, PIN Code" required></textarea>
-          <span class="field-error">Please enter your complete address.</span>
-        </div>
-
-        <div class="field-row">
-          <div class="field" id="f-visitors">
-            <label for="visitors">Number of Visitors</label>
-            <select id="visitors">
-              <option value="1">1 Person</option>
-              <option value="2" selected>2 People</option>
-              <option value="3">3 People</option>
-              <option value="4">4+ People</option>
-            </select>
-          </div>
-          <div class="field" id="f-date">
-            <label for="visitDate">Visit Date</label>
-            <input type="date" id="visitDate" required>
-            <span class="field-error">Please choose a visit date.</span>
-          </div>
-        </div>
-
-        <div class="field" id="f-time">
-          <label>Preferred Visit Time</label>
-          <div class="slot-grid" id="slotGrid">
-            <div class="slot" data-slot="10:00 AM – 11:00 AM">10:00 – 11:00 AM</div>
-            <div class="slot" data-slot="11:30 AM – 12:30 PM">11:30 – 12:30 PM</div>
-            <div class="slot" data-slot="1:00 PM – 2:00 PM">1:00 – 2:00 PM</div>
-            <div class="slot" data-slot="3:00 PM – 4:00 PM">3:00 – 4:00 PM</div>
-            <div class="slot" data-slot="4:30 PM – 5:30 PM">4:30 – 5:30 PM</div>
-            <div class="slot" data-slot="6:00 PM – 7:00 PM">6:00 – 7:00 PM</div>
-          </div>
-          <span class="field-error" id="slotError">Please pick a visit time slot.</span>
-        </div>
-
-        <div class="field" id="f-notes">
-          <label for="notes">Anything the owner should know? (optional)</label>
-          <textarea id="notes" placeholder="e.g. Looking to move in by 1st of next month"></textarea>
-        </div>
-
-        <div class="field" id="f-payment">
-          <label>Scan &amp; Pay ₹199 Booking Fee</label>
-          <div class="qr-box">
-            <img id="qrImg" alt="UPI QR Code" width="200" height="200">
-            <div class="upi-id-row">
-              <span id="upiIdText" class="mono"></span>
-              <button type="button" id="copyUpiBtn" class="copy-btn">Copy UPI ID</button>
+          <div class="field-row">
+            <div class="field" id="f-mobile">
+              <label for="mobile">Mobile Number</label>
+              <input type="tel" id="mobile" placeholder="10-digit mobile number" maxlength="10" required>
+              <span class="field-error">Enter a valid 10-digit mobile number.</span>
             </div>
-            <p class="qr-note">Scan this with any UPI app (GPay, PhonePe, Paytm) — amount ₹199 is pre-filled. After paying, enter the UTR / Reference No. below.</p>
+            <div class="field" id="f-email">
+              <label for="email">Email (required)</label>
+              <input type="email" id="email" placeholder="you@example.com" required>
+              <span class="field-error">Enter a valid email — confirmation will be sent here.</span>
+            </div>
+          </div>
+
+          <div class="field" id="f-address">
+            <label for="address">Your Current Address</label>
+            <textarea id="address" placeholder="House/Flat No., Street, Area, City, PIN Code" required></textarea>
+            <span class="field-error">Please enter your complete address.</span>
+          </div>
+
+          <div class="field-row">
+            <div class="field" id="f-visitors">
+              <label for="visitors">Number of Visitors</label>
+              <select id="visitors">
+                <option value="1">1 Person</option>
+                <option value="2" selected>2 People</option>
+                <option value="3">3 People</option>
+                <option value="4">4+ People</option>
+              </select>
+            </div>
+            <div class="field" id="f-date">
+              <label for="visitDate">Visit Date</label>
+              <input type="date" id="visitDate" required>
+              <span class="field-error">Please choose a visit date.</span>
+            </div>
+          </div>
+
+          <div class="field" id="f-time">
+            <label>Preferred Visit Time</label>
+            <div class="slot-grid" id="slotGrid">
+              <div class="slot" data-slot="10:00 AM – 11:00 AM">10:00 – 11:00 AM</div>
+              <div class="slot" data-slot="11:30 AM – 12:30 PM">11:30 – 12:30 PM</div>
+              <div class="slot" data-slot="1:00 PM – 2:00 PM">1:00 – 2:00 PM</div>
+              <div class="slot" data-slot="3:00 PM – 4:00 PM">3:00 – 4:00 PM</div>
+              <div class="slot" data-slot="4:30 PM – 5:30 PM">4:30 – 5:30 PM</div>
+              <div class="slot" data-slot="6:00 PM – 7:00 PM">6:00 – 7:00 PM</div>
+            </div>
+            <span class="field-error" id="slotError">Please pick a visit time slot.</span>
+          </div>
+
+          <div class="field" id="f-notes">
+            <label for="notes">Anything the owner should know? (optional)</label>
+            <textarea id="notes" placeholder="e.g. Looking to move in by 1st of next month"></textarea>
+          </div>
+
+          <div class="btn-row">
+            <button type="button" class="submit-btn" id="toStep2">Continue to Payment →</button>
+          </div>
+          <p class="form-note">Next: pay ₹199 booking fee via UPI. Fee is adjusted against first month's rent if you take the flat.</p>
+        </div>
+
+        <div class="step-panel" id="step2">
+          <div class="field" id="f-payment">
+            <label>Scan &amp; Pay ₹199 Booking Fee</label>
+            <div class="qr-box">
+              <img id="qrImg" alt="UPI QR Code" width="200" height="200">
+              <div class="upi-id-row">
+                <span id="upiIdText" class="mono"></span>
+                <button type="button" id="copyUpiBtn" class="copy-btn">Copy UPI ID</button>
+              </div>
+              <p class="qr-note">Scan with GPay, PhonePe or Paytm — amount ₹199 is pre-filled. After paying, go to next step and enter UTR.</p>
+            </div>
+          </div>
+          <div class="btn-row">
+            <button type="button" class="secondary-btn" id="backTo1">← Back</button>
+            <button type="button" class="submit-btn" id="toStep3">I have paid →</button>
           </div>
         </div>
 
-        <div class="field" id="f-utr">
-          <label for="utr">UTR / Transaction Reference Number</label>
-          <input type="text" id="utr" placeholder="e.g. 12-digit number from your payment app" required>
-          <span class="field-error">Please enter the UTR number after completing the payment.</span>
+        <div class="step-panel" id="step3">
+          <div class="field" id="f-utr">
+            <label for="utr">UTR / Transaction Reference Number</label>
+            <input type="text" id="utr" placeholder="e.g. 12-digit number from your payment app" required>
+            <span class="field-error">Please enter the UTR number after completing the payment.</span>
+          </div>
+          <div class="btn-row">
+            <button type="button" class="secondary-btn" id="backTo2">← Back</button>
+            <button type="submit" class="submit-btn" id="payBtn">Submit &amp; Confirm Visit</button>
+          </div>
+          <p class="form-note">Your visit will be confirmed once we verify the payment against this UTR (usually within a few hours). You will get an email update.</p>
         </div>
 
-        <button type="submit" class="submit-btn" id="payBtn">Submit &amp; Confirm Visit</button>
-        <p class="form-note">Your visit will be confirmed once we verify the payment against this UTR (usually within a few hours). Booking fee is adjusted against your first month's rent if you finalise this flat.</p>
       </form>
 
-      <!-- SUMMARY -->
       <aside class="summary-card">
         <span class="badge" id="sumBHK">2 BHK</span>
         <h2 id="sumTitle">Selected Flat</h2>
@@ -235,97 +277,147 @@
 
         <div class="summary-total">
           <div>
-            <span class="lbl">Booking fee (payment coming soon)</span><br>
+            <span class="lbl">Visit booking fee</span><br>
             <span class="amt">₹199</span>
           </div>
         </div>
-        <p class="summary-fine">Online payment (₹199 booking fee via Razorpay) will be enabled shortly. For now, submitting confirms your visit request — our team will call to finalise.</p>
+        <p class="summary-fine">₹199 is adjusted against your first month's rent if you finalise this flat. Confirmation email will be sent after payment verification.</p>
       </aside>
     </div>
   </div>
 </main>
 
-<!-- Success overlay -->
 <div class="success-overlay" id="successOverlay">
   <div class="success-box">
     <div class="check">
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#F5EFE3" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg>
     </div>
     <h2>Request Submitted!</h2>
-    <p id="successMsg">Our Agent will reach you soon.</p>
+    <p id="successMsg">Our team will verify your payment and email you the visit status shortly.</p>
     <div class="ref" id="successRef">UTR: —</div>
     <p class="tagline">Thanks for being with High Standard Apartment, Jaipur — by Premium Market</p>
-    <a href="index.html" class="cta-btn" style="display:inline-block; background:var(--ink); color:var(--ivory); padding:12px 24px; border-radius:2px; font-family:'IBM Plex Mono',monospace; font-size:0.75rem; text-transform:uppercase;">Back to Listings</a>
+    <a href="index.html" class="submit-btn" style="display:inline-block; text-decoration:none; max-width:220px;">Back to Listings</a>
   </div>
 </div>
 
 <script>
-  // ---- Read selected property from query params ----
   const params = new URLSearchParams(window.location.search);
-  const propId    = params.get('id')    || 'demo-flat';
-  const propTitle = params.get('title') || 'High Standard Apartment Flat';
-  const propArea  = params.get('area')  || 'Jaipur';
-  const propBHK   = params.get('bhk')   || '2 BHK';
-  const propRent  = parseInt(params.get('rent'))    || 18000;
-  const propDep   = parseInt(params.get('deposit')) || 36000;
+  const propId = params.get('id') || '';
+  const propTitle = params.get('title') || 'Selected Flat';
+  const propArea = params.get('area') || 'Jaipur';
+  const propBhk = params.get('bhk') || '';
+  const propRent = params.get('rent') || '';
+  const propDeposit = params.get('deposit') || '';
 
-  document.getElementById('sumTitle').textContent   = propTitle;
-  document.getElementById('sumArea').textContent     = propArea + ', Jaipur';
-  document.getElementById('sumBHK').textContent      = propBHK;
-  document.getElementById('sumRent').textContent     = '₹' + propRent.toLocaleString('en-IN') + ' / mo';
-  document.getElementById('sumDeposit').textContent  = '₹' + propDep.toLocaleString('en-IN');
+  document.getElementById('sumTitle').textContent = propTitle;
+  document.getElementById('sumArea').textContent = propArea + ', Jaipur';
+  document.getElementById('sumBHK').textContent = propBhk || 'Flat';
+  if (propRent) document.getElementById('sumRent').textContent = '₹' + Number(propRent).toLocaleString('en-IN');
+  if (propDeposit) document.getElementById('sumDeposit').textContent = '₹' + Number(propDeposit).toLocaleString('en-IN');
 
-  // min date = today
   const dateInput = document.getElementById('visitDate');
-  dateInput.min = new Date().toISOString().split('T')[0];
-  dateInput.addEventListener('change', () => {
-    document.getElementById('sumDate').textContent = dateInput.value || '—';
-  });
+  const today = new Date();
+  dateInput.min = today.toISOString().split('T')[0];
 
-  // time slot selection
   let selectedSlot = '';
+  let currentStep = 1;
+
   document.querySelectorAll('.slot').forEach(el => {
-    el.addEventListener('click', () => {
+    el.addEventListener('click', function(){
       document.querySelectorAll('.slot').forEach(s => s.classList.remove('active'));
-      el.classList.add('active');
-      selectedSlot = el.dataset.slot;
-      document.getElementById('sumTime').textContent = selectedSlot;
+      this.classList.add('active');
+      selectedSlot = this.dataset.slot;
       document.getElementById('f-time').classList.remove('invalid');
+      document.getElementById('sumTime').textContent = selectedSlot;
     });
   });
 
-  // ---- Validation ----
+  dateInput.addEventListener('change', function(){
+    document.getElementById('sumDate').textContent = this.value || '—';
+  });
+
   function setInvalid(fieldId, invalid){
-    document.getElementById(fieldId).classList.toggle('invalid', invalid);
+    const el = document.getElementById(fieldId);
+    if (el) el.classList.toggle('invalid', invalid);
   }
 
-  function validate(){
+  function validateStep1(){
     let ok = true;
     const name = document.getElementById('fullName').value.trim();
+    if (name.length < 2){ setInvalid('f-name', true); ok = false; } else setInvalid('f-name', false);
+
     const mobile = document.getElementById('mobile').value.trim();
+    if (!/^[6-9]\d{9}$/.test(mobile)){ setInvalid('f-mobile', true); ok = false; } else setInvalid('f-mobile', false);
+
     const email = document.getElementById('email').value.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ setInvalid('f-email', true); ok = false; } else setInvalid('f-email', false);
+
     const address = document.getElementById('address').value.trim();
-    const visitDate = document.getElementById('visitDate').value;
+    if (address.length < 8){ setInvalid('f-address', true); ok = false; } else setInvalid('f-address', false);
 
-    if(name.length < 3){ setInvalid('f-name', true); ok = false; } else setInvalid('f-name', false);
-    if(!/^[6-9]\d{9}$/.test(mobile)){ setInvalid('f-mobile', true); ok = false; } else setInvalid('f-mobile', false);
-    if(email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ setInvalid('f-email', true); ok = false; } else setInvalid('f-email', false);
-    if(address.length < 10){ setInvalid('f-address', true); ok = false; } else setInvalid('f-address', false);
-    if(!visitDate){ setInvalid('f-date', true); ok = false; } else setInvalid('f-date', false);
-    if(!selectedSlot){ setInvalid('f-time', true); ok = false; } else setInvalid('f-time', false);
+    if (!dateInput.value){ setInvalid('f-date', true); ok = false; } else setInvalid('f-date', false);
 
-    const utr = document.getElementById('utr').value.trim();
-    if(utr.length < 6){ setInvalid('f-utr', true); ok = false; } else setInvalid('f-utr', false);
-
+    if (!selectedSlot){
+      document.getElementById('f-time').classList.add('invalid');
+      document.getElementById('slotError').style.display = 'block';
+      ok = false;
+    } else {
+      document.getElementById('f-time').classList.remove('invalid');
+      document.getElementById('slotError').style.display = 'none';
+    }
     return ok;
   }
 
-  // ---- UPI QR payment setup ----
+  function validateStep3(){
+    const utr = document.getElementById('utr').value.trim();
+    if (utr.length < 6){ setInvalid('f-utr', true); return false; }
+    setInvalid('f-utr', false);
+    return true;
+  }
+
+  function goToStep(n){
+    currentStep = n;
+    document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('step' + n).classList.add('active');
+
+    document.querySelectorAll('.step-pill').forEach(pill => {
+      const s = Number(pill.dataset.step);
+      pill.classList.remove('active', 'done');
+      if (s === n) pill.classList.add('active');
+      else if (s < n) pill.classList.add('done');
+    });
+
+    const titles = {
+      1: 'Your details',
+      2: 'Pay the booking fee',
+      3: 'Enter UTR & submit'
+    };
+    document.getElementById('pageTitle').textContent = titles[n] || 'Book a visit';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  document.getElementById('toStep2').addEventListener('click', function(){
+    if (!validateStep1()){
+      document.querySelector('.field.invalid, #f-time.invalid')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+    goToStep(2);
+  });
+
+  document.getElementById('toStep3').addEventListener('click', function(){
+    goToStep(3);
+  });
+
+  document.getElementById('backTo1').addEventListener('click', function(){ goToStep(1); });
+  document.getElementById('backTo2').addEventListener('click', function(){ goToStep(2); });
+
   const UPI_ID = "aaryanjangir@fam";
   const PAYEE_NAME = "High Standard Apartment";
-  const upiLink = `upi://pay?pa=${encodeURIComponent(UPI_ID)}&pn=${encodeURIComponent(PAYEE_NAME)}&am=199&cu=INR&tn=${encodeURIComponent('Visit Booking - ' + propTitle)}`;
+  const BOOKING_FEE_INR = 199;
+  const upiLink = `upi://pay?pa=${encodeURIComponent(UPI_ID)}&pn=${encodeURIComponent(PAYEE_NAME)}&am=${BOOKING_FEE_INR}&cu=INR&tn=${encodeURIComponent('Visit Booking - ' + propTitle)}`;
   document.getElementById('qrImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(upiLink)}`;
   document.getElementById('upiIdText').textContent = 'UPI ID: ' + UPI_ID;
+
   document.getElementById('copyUpiBtn').addEventListener('click', function(){
     navigator.clipboard.writeText(UPI_ID).then(() => {
       this.textContent = 'Copied!';
@@ -334,18 +426,15 @@
     });
   });
 
-  // ---- Panel connection ----
-  // Paste your deployed Google Apps Script Web App URL here (see panel-setup-code.gs)
-  // Example: "https://script.google.com/macros/s/AKfycb.../exec"
+  // IMPORTANT: After deploying Code.gs, replace this with your NEW Web App URL
   const PANEL_URL = "https://script.google.com/macros/s/AKfycby0YChLKn8I5nLurKf4pFtupmf-4Tm9kxVI3Kjv0HFbyPFTZ2_sLfPrnVdc1ENwmTRaYA/exec";
-
-  // ---- Booking fee ----
-  const BOOKING_FEE_INR = 199; // ₹199 visit booking fee, paid manually via UPI QR above
 
   document.getElementById('bookingForm').addEventListener('submit', function(e){
     e.preventDefault();
-    if(!validate()){
-      document.querySelector('.field.invalid, #f-time.invalid')?.scrollIntoView({behavior:'smooth', block:'center'});
+    if (currentStep !== 3) return;
+    if (!validateStep1() || !validateStep3()){
+      if (!validateStep1()) goToStep(1);
+      else document.getElementById('f-utr')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
     }
 
@@ -354,8 +443,13 @@
     payBtn.textContent = 'Submitting…';
 
     const bookingDetails = {
+      action: 'new_booking',
       propertyId: propId,
       propertyTitle: propTitle,
+      area: propArea,
+      bhk: propBhk,
+      rent: propRent,
+      deposit: propDeposit,
       name: document.getElementById('fullName').value.trim(),
       mobile: document.getElementById('mobile').value.trim(),
       email: document.getElementById('email').value.trim(),
@@ -368,18 +462,16 @@
       utr: document.getElementById('utr').value.trim()
     };
 
-    // Send the lead + UTR to your panel (Google Sheet). You'll manually verify
-    // the UTR in your UPI app and mark Status as Confirmed/Failed in the sheet.
     if (PANEL_URL && PANEL_URL.indexOf('YOUR_APPS_SCRIPT_URL_HERE') === -1) {
       fetch(PANEL_URL, {
         method: 'POST',
         mode: 'no-cors',
         headers: { 'Content-Type': 'text/plain' },
         body: JSON.stringify(bookingDetails)
-      }).catch(function(err){ console.error('Could not save lead to panel:', err); });
+      }).catch(function(err){ console.error('Could not send booking:', err); });
     }
 
-    document.getElementById('successMsg').textContent = 'Our Agent will reach you soon.';
+    document.getElementById('successMsg').textContent = 'Our team will verify your payment and email you the visit status shortly.';
     document.getElementById('successRef').textContent = 'UTR: ' + bookingDetails.utr;
     document.getElementById('successOverlay').classList.add('show');
 
